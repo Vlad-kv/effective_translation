@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+parser_by_hands/parser_by_hands.depend
+parser_by_hands/parser_by_hands.layout
+parser_by_hands/input.txt
+parser_by_hands/output.txt
