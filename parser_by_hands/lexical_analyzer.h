@@ -2,14 +2,19 @@
 #define LEXICAL_ANALYZER_H
 
 #include <iostream>
+using namespace std;
 
 class token {
 public:
-	token(char val);
+	token(char val = 0);
 	token(const token& t);
+	
+	char get_val() const;
 	
 	friend bool operator==(const token& t_1, const token& t_2);
 	friend bool operator!=(const token& t_1, const token& t_2);
+	
+	friend bool operator<(const token& t_1, const token& t_2);
 private:
 	char val;
 };

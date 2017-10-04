@@ -13,10 +13,13 @@ namespace tokens_constants {
 }
 
 token::token(char val) 
-: val(val){
+: val(val) {
 }
 token::token(const token& t)
 : val(t.val) {
+}
+char token::get_val() const {
+	return val;
 }
 bool operator==(const token& t_1, const token& t_2) {
 	if (('a' <= min(t_1.val, t_2.val)) && (max(t_1.val, t_2.val) <= 'z')) {
@@ -26,6 +29,12 @@ bool operator==(const token& t_1, const token& t_2) {
 }
 bool operator!=(const token& t_1, const token& t_2) {
 	return !(t_1 == t_2);
+}
+bool operator<(const token& t_1, const token& t_2) {
+	if (t_1 == t_2) {
+		return false;
+	}
+	return (t_1.val < t_2.val);
 }
 
 lexical_analyzer::lexical_analyzer(std::istream& input)
@@ -38,7 +47,6 @@ token lexical_analyzer::get_next_token() {
 	do {
 		res = input.get();
 		pos++;
-		cout << (int)res << " " << char_traits<char>::eof() << "\n";
 	} while (is_space(res));
 	if (res == char_traits<char>::eof()) {
 		return {'$'};

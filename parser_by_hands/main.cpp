@@ -4,31 +4,14 @@
 #include <fstream>
 
 #include "lexical_analyzer.h"
+#include "parser.h"
 #include "work_with_LL1.h"
+#include "visualization.h"
 using namespace std;
 using namespace tokens_constants;
 
-int main() {
-	ifstream z("input.txt");
-//	ofstream x("output.txt");
-	int q, w, e, r;
-    
-//    lexical_analyzer analyzer(z);
-//    
-//    token prev_t = CHAR;
-//    while (prev_t != END) {
-//		try {
-//			prev_t = analyzer.get_next_token();
-//			if (prev_t == L_BRACE) {
-//				cout << "L_BRACE\n";
-//			}
-//		} catch (runtime_error err) {
-//			cout << err.what() << "\n";
-//			return 0;
-//		}
-//    }
-    
-    try {
+void print_grammatic_info() {
+	try {
     	grammatic_info info(
 			"R",
 			{
@@ -51,9 +34,28 @@ int main() {
 		
     } catch (runtime_error err) {
     	cout << "runtime_error : " << err.what() << "\n";
+    	return;
+    }
+}
+
+int main() {
+	ifstream z("input.txt");
+	freopen("output.txt", "w", stdout);
+	int q, w, e, r;
+    
+//    print_grammatic_info();
+//    return 0;
+    
+    lexical_analyzer analyzer(z);
+    parser my_p;
+    expr_sp res;
+    try {
+		res = my_p.parse(analyzer);
+    } catch (runtime_error err) {
+    	cout << "runtime_error : " << err.what() << "\n";
     	return 0;
     }
-    
-    
+    cout << to_string(res) << "\n\n";
+    visualize(res);
     return 0;
 }

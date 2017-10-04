@@ -37,6 +37,10 @@
 		<Unit filename="lexical_analyzer.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="output.txt" />
+		<Unit filename="parser.cpp" />
+		<Unit filename="parser.h" />
+		<Unit filename="visualization.cpp" />
+		<Unit filename="visualization.h" />
 		<Unit filename="work_with_LL1.cpp" />
 		<Unit filename="work_with_LL1.h" />
 		<Extensions>
