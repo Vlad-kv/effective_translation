@@ -48,6 +48,7 @@ token lexical_analyzer::get_next_token() {
 		res = input.get();
 		pos++;
 	} while (is_space(res));
+	
 	if (res == char_traits<char>::eof()) {
 		return {'$'};
 	}

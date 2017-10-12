@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="parser_by_hands/parser_by_hands.cbp" />
+		<Project filename="parser_by_hands/tests/tests.cbp">
+			<Depends filename="parser_by_hands/parser_by_hands.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

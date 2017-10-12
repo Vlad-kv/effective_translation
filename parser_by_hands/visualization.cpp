@@ -85,7 +85,7 @@ void build(expr_sp c, int st_1, int st_2) {
 	}
 }
 
-void visualize(expr_sp c) {
+void visualize(expr_sp c, std::ostream& out) {
 	int size_1 = calc_depth(c), size_2 = calc_width(c);
 	for (int e = 0; e < size_1; e++) {
 		field.push_back("");
@@ -95,7 +95,7 @@ void visualize(expr_sp c) {
 	}
 	build(c, 0, 0);
 	for (auto &str : field) {
-		cout << str << "\n";
+		out << str << "\n";
 	}
 	field.clear();
 }

@@ -46,6 +46,7 @@ expr_sp parser::parse(lexical_analyzer& analyzer) {
 }
 token parser::read_next() {
 	curr_token = analyzer->get_next_token();
+	no_of_token++;
 	return curr_token;
 }
 void parser::check(bool assertion, string mess) {
@@ -61,7 +62,7 @@ void parser::check_token(token t) {
 void parser::unexpected_token_error() {
 	string mess = "unexpected token \"";
 	mess.push_back(curr_token.get_val());
-	throw runtime_error(mess + "\" on with number " + to_string(no_of_token));
+	throw runtime_error(mess + "\" with number " + to_string(no_of_token));
 }
 expr_sp parser::C() {
 	expr_sp res = make_shared<expr>("C");

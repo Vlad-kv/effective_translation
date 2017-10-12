@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
+#include <thread>
+#include <ctime>
 
 #include "lexical_analyzer.h"
 #include "parser.h"
@@ -40,7 +42,7 @@ void print_grammatic_info() {
 
 int main() {
 	ifstream z("input.txt");
-	freopen("output.txt", "w", stdout);
+	ofstream x("output.txt");
 	int q, w, e, r;
     
 //    print_grammatic_info();
@@ -52,10 +54,11 @@ int main() {
     try {
 		res = my_p.parse(analyzer);
     } catch (runtime_error err) {
-    	cout << "runtime_error : " << err.what() << "\n";
+    	x << "Error : " << err.what() << "\n";
     	return 0;
     }
-    cout << to_string(res) << "\n\n";
-    visualize(res);
+    x << "OK\n";
+    x << to_string(res) << "\n\n";
+    visualize(res, x);
     return 0;
 }
