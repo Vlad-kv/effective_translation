@@ -98,12 +98,21 @@ expr_sp parser::C_() {
 }
 expr_sp parser::O() {
 	expr_sp res = make_shared<expr>("O");
+	if (compare_to_curr_token(END, L_BRACE, R_BRACE, CHAR, OR)) {
+		res->add_to_childrens(O_());
+		return res;
+	}
+	unexpected_token_error();
+	return nullptr;
+}
+expr_sp parser::O_() {
+	expr_sp res = make_shared<expr>("O_");
 	if (compare_to_curr_token(END, R_BRACE, OR)) {
 		return res;
 	}
 	if (compare_to_curr_token(L_BRACE, CHAR)) {
 		res->add_to_childrens(C());
-		res->add_to_childrens(O());
+		res->add_to_childrens(O_());
 		return res;
 	}
 	unexpected_token_error();
@@ -126,7 +135,8 @@ expr_sp parser::R_() {
 	}
 	if (curr_token == OR) {
 		read_next();
-		res->add_to_childrens(R());
+		res->add_to_childrens(O());
+		res->add_to_childrens(R_());
 		return res;
 	}
 	unexpected_token_error();

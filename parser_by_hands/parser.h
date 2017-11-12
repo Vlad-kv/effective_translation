@@ -45,6 +45,7 @@ private:
 	expr_sp C();
 	expr_sp C_();
 	expr_sp O();
+	expr_sp O_();
 	expr_sp R();
 	expr_sp R_();
 	
