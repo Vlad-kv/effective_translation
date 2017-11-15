@@ -26,6 +26,8 @@ namespace tokens_constants {
 	extern const token L_BRACE;
 	extern const token R_BRACE;
 	extern const token CHAR;
+	extern const token PLUS;
+	extern const token QUESTION;
 }
 class lexical_analyzer {
 public:

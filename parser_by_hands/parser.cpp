@@ -88,8 +88,8 @@ expr_sp parser::C_() {
 	if (compare_to_curr_token(END, L_BRACE, R_BRACE, CHAR, OR)) {
 		return res;
 	}
-	if (curr_token == ASTERISK) {
-		read_next();
+	if (compare_to_curr_token(ASTERISK, PLUS, QUESTION)) {
+		res->add_to_childrens(M());
 		res->add_to_childrens(C_());
 		return res;
 	}
@@ -137,6 +137,18 @@ expr_sp parser::R_() {
 		read_next();
 		res->add_to_childrens(O());
 		res->add_to_childrens(R_());
+		return res;
+	}
+	unexpected_token_error();
+	return nullptr;
+}
+expr_sp parser::M() {
+	expr_sp res = make_shared<expr>("M");
+	if (compare_to_curr_token(ASTERISK, PLUS, QUESTION)) {
+		string str;
+		str.push_back(curr_token.get_val());
+		res->add_to_childrens(make_shared<expr>(str, curr_token));
+		read_next();
 		return res;
 	}
 	unexpected_token_error();

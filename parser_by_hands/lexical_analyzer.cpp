@@ -10,6 +10,8 @@ namespace tokens_constants {
 	const token L_BRACE('(');
 	const token R_BRACE(')');
 	const token CHAR('a');
+	const token PLUS('+');
+	const token QUESTION('?');
 }
 
 token::token(char val) 
@@ -54,7 +56,7 @@ token lexical_analyzer::get_next_token() {
 	}
 	token result(res);
 	if ((result != ASTERISK) && (result != OR) && (result != END) && (result != L_BRACE) &&
-		(result != R_BRACE) && (result != CHAR)) {
+		(result != R_BRACE) && (result != CHAR) && (result != PLUS) && (result != QUESTION)) {
 		throw runtime_error("Forbidden char with code " + to_string((int)res) + " on position " + to_string(pos));
 	}
 	return result;

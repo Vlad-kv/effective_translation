@@ -48,6 +48,7 @@ private:
 	expr_sp O_();
 	expr_sp R();
 	expr_sp R_();
+	expr_sp M();
 	
 	token curr_token;
 	size_t no_of_token;
