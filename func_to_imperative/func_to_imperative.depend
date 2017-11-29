@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1511983431 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
+	<stdio.h>
+	<ctype.h>
+	<string>
+	<iostream>
+	"functional_parser.tab.hpp"
+
+1511958815 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\test.tab.hpp
+
+1511970527 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\main.cpp
+	<iostream>
+
+1511970528 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\grammar.tab.hpp
+
+1511983763 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
+
+1511983724 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser_error.cpp
+	<stdio.h>
+

@@ -36,3 +36,5 @@ parser_by_hands/input.txt
 parser_by_hands/output.txt
 parser_by_hands/tests/tests.layout
 parser_by_hands/tests/tests.depend
+func_to_imperative/functional_parser.tab.cpp
+func_to_imperative/functional_parser.tab.hpp
