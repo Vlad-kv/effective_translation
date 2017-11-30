@@ -38,8 +38,12 @@
 		<Unit filename="functional_parser.tab.cpp" />
 		<Unit filename="functional_parser.tab.hpp" />
 		<Unit filename="functional_parser.ypp" />
+		<Unit filename="input.txt" />
 		<Unit filename="lexical_analyzer.cpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="output.txt" />
+		<Unit filename="parser.cpp" />
+		<Unit filename="parser.h" />
 		<Unit filename="parser_error.cpp" />
 		<Extensions>
 			<code_completion />

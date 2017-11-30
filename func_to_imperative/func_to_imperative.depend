@@ -1,20 +1,32 @@
 # depslib dependency file v1.0
-1511983431 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
+1512047228 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
 	<stdio.h>
 	<ctype.h>
 	<string>
 	<iostream>
+	<set>
+	<map>
+	<vector>
 	"functional_parser.tab.hpp"
 
 1511958815 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\test.tab.hpp
 
-1511970527 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\main.cpp
+1512047210 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\main.cpp
 	<iostream>
+	<fstream>
+	<iomanip>
+	"parser.h"
 
 1511970528 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\grammar.tab.hpp
 
-1511983763 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
+1512047235 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
 
-1511983724 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser_error.cpp
+1512035642 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser_error.cpp
 	<stdio.h>
+
+1512028635 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser.h
+	<iostream>
+
+1512040546 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser.cpp
+	"parser.h"
 
