@@ -8,6 +8,7 @@
     #include <string>
     
     #include "parser.h"
+    #include "functional_grammar.h"
 
     int yylex();
     void yyerror(char const *);
@@ -20,18 +21,28 @@
     char *char_ptr_val;
     std::string *string_ptr_val;
     std::vector<std::string> *str_vector_ptr_val;
+    
+    f_type *f_type_ptr_val;
 }
 
 %token <int_val> INT_NUM
 %token <string_ptr_val> VAR_NAME
 
 %token LET
+%token IN
 
-%type <str_vector_ptr_val> arguments
-%type <int_val> global_defenitions
+%token UNIT
+%token INT
+%token STRING
+
+%type <str_vector_ptr_val> var_arguments
+%type <int_val> global_definitions
+%type <f_type_ptr_val> type
 
 //%type <double_val> exp
 //%type <double_val> line
+
+%right ARROW
 
 %left '-' '+'
 %left '*' '/'
@@ -40,26 +51,65 @@
 %right '^' /* exponentiation */
 
 %% /* The grammar follows. */
-    global_defenitions:
-        /* empty */
-        | global_defenitions definition
+    input : global_definitions
     ;
-    definition:
-        LET VAR_NAME arguments '=' INT_NUM ';' ';' {
-            *output_stream << "definition: " << *$2 << "   ";
+    global_definitions:
+        /* empty */
+        | global_definitions global_definition
+    ;
+    global_definition:
+        LET VAR_NAME var_arguments ':' type '=' INT_NUM ';' ';' {
+            f_type_sp t($5);
+            
+            *output_stream << "global_definition:\n"
+                << "  VAR_NAME: " << *$2 << "\n"
+                << "  var_arguments: ";
             for (std::string& var : *$3) {
                 *output_stream << var << " ";
             }
-            *output_stream << "\n";
+            *output_stream << "\n"
+                << "  type: " << to_string(t) << "\n";
             delete $2;
             delete $3;
         }
     ;
-    arguments:
+    local_definition:
+        LET VAR_NAME var_arguments ':' type '=' INT_NUM IN {
+            f_type_sp t($5);
+            
+            *output_stream << "global_definition:\n"
+                << "  VAR_NAME: " << *$2 << "\n"
+                << "  var_arguments: ";
+            for (std::string& var : *$3) {
+                *output_stream << var << " ";
+            }
+            *output_stream << "\n"
+                << "  type: " << to_string(t) << "\n";
+            delete $2;
+            delete $3;
+        }
+    ;
+    type:
+          UNIT     { $$ = new f_type(nullptr, nullptr, "unit"  ); }
+        | INT      { $$ = new f_type(nullptr, nullptr, "int"   ); }
+        | STRING   { $$ = new f_type(nullptr, nullptr, "string"); }
+        | VAR_NAME { $$ = new f_type(nullptr, nullptr, *$1     );
+                     delete $1; }
+        | type ARROW type {
+            $$ = new f_type(f_type_sp($1), f_type_sp($3));
+          }
+        | '(' type ')' { $$ = $2; }
+    ;
+    /*
+    term:
+          '(' ')' // unit
+        | '(' term ')'
+    */
+    var_arguments:
         /* empty */ {
             $$ = new std::vector<std::string>();
         }
-        | arguments VAR_NAME {
+        | var_arguments VAR_NAME {
             $1->push_back(std::move(*$2));
             $$ = $1;
             delete $2;

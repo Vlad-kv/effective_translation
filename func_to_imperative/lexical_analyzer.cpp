@@ -6,7 +6,9 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <limits>
 
+#include "functional_grammar.h"
 #include "functional_parser.tab.hpp"
 
 using namespace std;
@@ -29,7 +31,12 @@ const set<char> SPECIAL_SUMBOLS = {
     '@', '#', '$', ':', ';', '~'
 };
 const map<string, int> KEY_WORDS = {
-    {"let", LET}
+    {"let", LET},
+    {"in", IN},
+    
+    {"unit", UNIT},
+    {"int", INT},
+    {"string", STRING}
 };
 bool is_special_sumbol(char c) {
     return SPECIAL_SUMBOLS.count(c) > 0;
@@ -45,9 +52,8 @@ int yylex() {
         c = input_stream->get();
     }
     if (isdigit(c)) {
-        if (! input_stream->unget()) {
-            fatal_error("input_stream->unget() failed (in lexical_analyzer.cpp)");
-        }
+        input_stream->unget();
+        
         (*input_stream) >> yylval.int_val;
         return INT_NUM;
     }
@@ -58,19 +64,24 @@ int yylex() {
             c = input_stream->get();
         } while (is_normal_sumbol(c));
         
-        if (! input_stream->unget()) {
-            fatal_error("input_stream->unget() failed (in lexical_analyzer.cpp)");
-        }
+        input_stream->unget();
+        
         if (KEY_WORDS.count(buff) > 0) {
             return (*KEY_WORDS.find(buff)).second;
         }
-        
         yylval.string_ptr_val = new string();
         *yylval.string_ptr_val = move(buff);
         return VAR_NAME;
     }
     if (c == char_traits<char>::eof()) {
         return 0;
+    }
+    if (c == '-') {
+        char next_char = input_stream->get();
+        if (next_char == '>') {
+            return ARROW;
+        }
+        input_stream->unget();
     }
     return c;
 }
