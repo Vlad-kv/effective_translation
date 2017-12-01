@@ -9,9 +9,10 @@
 #include <limits>
 
 #include "functional_grammar.h"
-#include "functional_parser.tab.hpp"
 
 using namespace std;
+
+#include "functional_parser.tab.hpp"
 
 istream *input_stream = nullptr;
 ostream *output_stream = nullptr;
@@ -33,6 +34,7 @@ const set<char> SPECIAL_SUMBOLS = {
 const map<string, int> KEY_WORDS = {
     {"let", LET},
     {"in", IN},
+    {"rec", REC},
     
     {"unit", UNIT},
     {"int", INT},

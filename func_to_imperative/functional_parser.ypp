@@ -7,6 +7,8 @@
     #include <vector>
     #include <string>
     
+    using namespace std;
+    
     #include "parser.h"
     #include "functional_grammar.h"
 
@@ -19,8 +21,8 @@
     int int_val;
     
     char *char_ptr_val;
-    std::string *string_ptr_val;
-    std::vector<std::string> *str_vector_ptr_val;
+    string *string_ptr_val;
+    vector<string> *str_vector_ptr_val;
     
     f_type *f_type_ptr_val;
 }
@@ -30,17 +32,14 @@
 
 %token LET
 %token IN
+%token REC
 
 %token UNIT
 %token INT
 %token STRING
 
 %type <str_vector_ptr_val> var_arguments
-%type <int_val> global_definitions
 %type <f_type_ptr_val> type
-
-//%type <double_val> exp
-//%type <double_val> line
 
 %right ARROW
 
@@ -48,45 +47,42 @@
 %left '*' '/'
 
 %left NEG /* negation--unary minus */
-%right '^' /* exponentiation */
+%left '^' /* string concatenation */
+
+%left APPLICATION
 
 %% /* The grammar follows. */
     input : global_definitions
     ;
     global_definitions:
-        /* empty */
+          /* empty */
         | global_definitions global_definition
     ;
-    global_definition:
-        LET VAR_NAME var_arguments ':' type '=' INT_NUM ';' ';' {
-            f_type_sp t($5);
+    main_part_of_definition:
+        VAR_NAME var_arguments ':' type '=' term {
+            f_type_sp t($4);
             
-            *output_stream << "global_definition:\n"
-                << "  VAR_NAME: " << *$2 << "\n"
+            *output_stream << "definition:\n"
+                << "  VAR_NAME: " << *$1 << "\n"
                 << "  var_arguments: ";
-            for (std::string& var : *$3) {
+            for (std::string& var : *$2) {
                 *output_stream << var << " ";
             }
             *output_stream << "\n"
                 << "  type: " << to_string(t) << "\n";
+            delete $1;
             delete $2;
-            delete $3;
+        }
+    ;
+    definition:
+          LET main_part_of_definition
+        | LET REC main_part_of_definition
+    global_definition:
+        definition ';' ';' {
         }
     ;
     local_definition:
-        LET VAR_NAME var_arguments ':' type '=' INT_NUM IN {
-            f_type_sp t($5);
-            
-            *output_stream << "global_definition:\n"
-                << "  VAR_NAME: " << *$2 << "\n"
-                << "  var_arguments: ";
-            for (std::string& var : *$3) {
-                *output_stream << var << " ";
-            }
-            *output_stream << "\n"
-                << "  type: " << to_string(t) << "\n";
-            delete $2;
-            delete $3;
+        definition IN {
         }
     ;
     type:
@@ -100,45 +96,27 @@
           }
         | '(' type ')' { $$ = $2; }
     ;
-    /*
     term:
           '(' ')' // unit
         | '(' term ')'
-    */
+        | VAR_NAME
+        | term '+' term
+        | term '-' term
+        | term '*' term
+        | term '/' term
+        | term '^' term
+        | term term %prec APPLICATION
+        | INT_NUM
+        | local_definition term
+    ;
     var_arguments:
-        /* empty */ {
-            $$ = new std::vector<std::string>();
+          /* empty */ {
+            $$ = new vector<string>();
         }
         | var_arguments VAR_NAME {
-            $1->push_back(std::move(*$2));
+            $1->push_back(move(*$2));
             $$ = $1;
             delete $2;
         }
     ;
-    input:
-        VAR_NAME {
-            *output_stream << "VAR_NAME: " << *$1 << "\n";
-            delete $1;
-        }
-    ;
 %%
-
-/*
-    input: // empty
-        | input line
-    ;
-    line: '\n'
-        | exp '\n' { *output_stream << "  " << std::setprecision(10) << $1 << "\n"; }
-    ;
-    exp: NUM { $$ = $1; }
-        | exp '*' exp { $$ = $1 * $3; }
-
-        | exp '+' exp { $$ = $1 + $3; }
-        | exp '-' exp { $$ = $1 - $3; }
-        
-        | exp '/' exp { $$ = $1 / $3; }
-        | '-' exp %prec NEG { $$ = -$2; }
-        | exp '^' exp { $$ = pow ($1, $3); }
-        | '(' exp ')' { $$ = $2; }
-    ;
-*/
