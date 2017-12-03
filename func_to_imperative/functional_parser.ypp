@@ -20,7 +20,6 @@
     double double_val;
     int int_val;
     
-    char *char_ptr_val;
     string *string_ptr_val;
     vector<string> *str_vector_ptr_val;
     
@@ -29,14 +28,27 @@
 
 %token <int_val> INT_NUM
 %token <string_ptr_val> VAR_NAME
+%token <string_ptr_val> STRING_CONSTANT
+
+%token DOUBLE_SEMICOLON
 
 %token LET
 %token IN
 %token REC
 
+%token FUN
+%token IF
+%token THEN
+%token ELSE
+%token BEGIN
+%token END
+
 %token UNIT
 %token INT
 %token STRING
+%token BOOL
+
+%token UNFINISHED_STRING
 
 %type <str_vector_ptr_val> var_arguments
 %type <f_type_ptr_val> type
@@ -52,50 +64,60 @@
 %left APPLICATION
 
 %% /* The grammar follows. */
-    input : global_definitions
+    input : global_terms
     ;
-    global_definitions:
+    global_terms:
           /* empty */
-        | global_definitions global_definition
+        | global_terms global_let_expression
+        | global_terms term DOUBLE_SEMICOLON
     ;
-    main_part_of_definition:
-        VAR_NAME var_arguments ':' type '=' term {
-            f_type_sp t($4);
+    let_declaration:
+        VAR_NAME ':' type '=' let_definition {
+            f_type_sp t($3);
             
             *output_stream << "definition:\n"
                 << "  VAR_NAME: " << *$1 << "\n"
-                << "  var_arguments: ";
-            for (std::string& var : *$2) {
-                *output_stream << var << " ";
-            }
-            *output_stream << "\n"
                 << "  type: " << to_string(t) << "\n";
             delete $1;
-            delete $2;
         }
     ;
-    definition:
-          LET main_part_of_definition
-        | LET REC main_part_of_definition
-    global_definition:
-        definition ';' ';' {
+    let_definition:
+          FUN var_arguments ARROW term_seq {
+          }
+        | term_seq
+    ;
+    let_expression:
+          LET let_declaration
+        | LET REC let_declaration
+    ;
+    global_let_expression:
+        let_expression DOUBLE_SEMICOLON {
         }
     ;
-    local_definition:
-        definition IN {
+    local_let_expression:
+        let_expression IN {
         }
+    ;
+    if_expr:
+          IF term THEN term if_else
+    ;
+    if_else:
+          // empty
+        | ELSE term
     ;
     type:
           UNIT     { $$ = new f_type(nullptr, nullptr, "unit"  ); }
         | INT      { $$ = new f_type(nullptr, nullptr, "int"   ); }
         | STRING   { $$ = new f_type(nullptr, nullptr, "string"); }
-        | VAR_NAME { $$ = new f_type(nullptr, nullptr, *$1     );
-                     delete $1; }
+        | BOOL     { $$ = new f_type(nullptr, nullptr, "bool"  ); }
         | type ARROW type {
             $$ = new f_type(f_type_sp($1), f_type_sp($3));
           }
         | '(' type ')' { $$ = $2; }
     ;
+    term_seq:
+          term
+        | term_seq ';' term
     term:
           '(' ')' // unit
         | '(' term ')'
@@ -107,11 +129,17 @@
         | term '^' term
         | term term %prec APPLICATION
         | INT_NUM
-        | local_definition term
+        | local_let_expression term
+        | STRING_CONSTANT {
+            delete $1;
+        }
+        | BEGIN term_seq END
+        | if_expr
     ;
     var_arguments:
-          /* empty */ {
-            $$ = new vector<string>();
+          VAR_NAME {
+            $$ = new vector<string>({*$1});
+            delete $1;
         }
         | var_arguments VAR_NAME {
             $1->push_back(move(*$2));

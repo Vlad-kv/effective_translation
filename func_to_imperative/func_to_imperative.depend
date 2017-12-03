@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1512149108 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
+1512306137 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
 	<stdio.h>
 	<ctype.h>
 	<string>
@@ -21,7 +21,7 @@
 
 1511970528 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\grammar.tab.hpp
 
-1512149342 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
+1512306182 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
 
 1512035642 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser_error.cpp
 	<stdio.h>
@@ -35,6 +35,6 @@
 1512129302 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.cpp
 	"functional_grammar.h"
 
-1512129236 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.h
+1512149602 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.h
 	<memory>
 

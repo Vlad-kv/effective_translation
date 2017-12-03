@@ -35,6 +35,8 @@
 		<ExtraCommands>
 			<Add before="bison -d functional_parser.ypp" />
 		</ExtraCommands>
+		<Unit filename="functional_grammar.cpp" />
+		<Unit filename="functional_grammar.h" />
 		<Unit filename="functional_parser.tab.cpp" />
 		<Unit filename="functional_parser.tab.hpp" />
 		<Unit filename="functional_parser.ypp" />

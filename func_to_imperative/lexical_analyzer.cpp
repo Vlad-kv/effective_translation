@@ -35,10 +35,18 @@ const map<string, int> KEY_WORDS = {
     {"let", LET},
     {"in", IN},
     {"rec", REC},
+    {"fun", FUN},
+    
+    {"if", IF},
+    {"then", THEN},
+    {"else", ELSE},
+    {"begin", BEGIN},
+    {"end", END},
     
     {"unit", UNIT},
     {"int", INT},
-    {"string", STRING}
+    {"string", STRING},
+    {"bool", BOOL}
 };
 bool is_special_sumbol(char c) {
     return SPECIAL_SUMBOLS.count(c) > 0;
@@ -52,6 +60,29 @@ int yylex() {
     
     while (is_space(c)) {
         c = input_stream->get();
+    }
+    if (c == '\"') { // string
+        string buff;
+        char prev = 0;
+        while (true) {
+            prev = c;
+            if (c == char_traits<char>::eof()) {
+                return UNFINISHED_STRING;
+            }
+            c = input_stream->get();
+            if ((prev != '\\') && (c == '\"')) {
+                yylval.string_ptr_val = new string();
+                *yylval.string_ptr_val = move(buff);
+                return STRING_CONSTANT;
+            }
+        }
+    }
+    if (c == ';') { // DOUBLE_SEMICOLON
+        char next_char = input_stream->get();
+        if (next_char == ';') {
+            return DOUBLE_SEMICOLON;
+        }
+        input_stream->unget();
     }
     if (isdigit(c)) {
         input_stream->unget();
