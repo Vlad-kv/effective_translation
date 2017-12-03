@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <limits>
+#include <list>
 
 #include "functional_grammar.h"
 
@@ -36,6 +37,8 @@ const map<string, int> KEY_WORDS = {
     {"in", IN},
     {"rec", REC},
     {"fun", FUN},
+    {"not", NOT},
+    {"mod", MOD},
     
     {"if", IF},
     {"then", THEN},
@@ -46,7 +49,16 @@ const map<string, int> KEY_WORDS = {
     {"unit", UNIT},
     {"int", INT},
     {"string", STRING},
-    {"bool", BOOL}
+    {"bool", BOOL},
+    
+    {"true", TRUE},
+    {"false", FALSE}
+};
+const map<string, int> DOUBLE_SUMBOLS = {
+    {";;", DOUBLE_SEMICOLON},
+    {"->", ARROW},
+    {"||", OR},
+    {"&&", AND}
 };
 bool is_special_sumbol(char c) {
     return SPECIAL_SUMBOLS.count(c) > 0;
@@ -77,13 +89,6 @@ int yylex() {
             }
         }
     }
-    if (c == ';') { // DOUBLE_SEMICOLON
-        char next_char = input_stream->get();
-        if (next_char == ';') {
-            return DOUBLE_SEMICOLON;
-        }
-        input_stream->unget();
-    }
     if (isdigit(c)) {
         input_stream->unget();
         
@@ -109,12 +114,12 @@ int yylex() {
     if (c == char_traits<char>::eof()) {
         return 0;
     }
-    if (c == '-') {
-        char next_char = input_stream->get();
-        if (next_char == '>') {
-            return ARROW;
-        }
-        input_stream->unget();
+    char next_char = input_stream->get();
+    string str({(char)c, next_char});
+    
+    if (DOUBLE_SUMBOLS.count(str) > 0) {
+        return (*DOUBLE_SUMBOLS.find(str)).second;
     }
+    input_stream->unget();
     return c;
 }

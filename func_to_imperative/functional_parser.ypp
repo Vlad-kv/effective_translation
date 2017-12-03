@@ -6,12 +6,14 @@
     
     #include <vector>
     #include <string>
+    #include <list>
     
     using namespace std;
     
     #include "parser.h"
     #include "functional_grammar.h"
-
+    #include "translation.h"
+    
     int yylex();
     void yyerror(char const *);
 %}
@@ -24,6 +26,9 @@
     vector<string> *str_vector_ptr_val;
     
     f_type *f_type_ptr_val;
+    
+    list<pair<string, int>> *source_code_ptr_val;
+    //pair< *list<pair<string, int>>, *f_type> *code_and_type_val;
 }
 
 %token <int_val> INT_NUM
@@ -35,6 +40,7 @@
 %token LET
 %token IN
 %token REC
+%token NOT
 
 %token FUN
 %token IF
@@ -48,15 +54,26 @@
 %token STRING
 %token BOOL
 
+%token TRUE
+%token FALSE
+
 %token UNFINISHED_STRING
 
 %type <str_vector_ptr_val> var_arguments
 %type <f_type_ptr_val> type
 
+%type <source_code_ptr_val> global_terms
+%type <source_code_ptr_val> term
+%type <source_code_ptr_val> term_seq
+
 %right ARROW
 
+%left '<' '>'
+%left OR
+%left AND
+
 %left '-' '+'
-%left '*' '/'
+%left '*' '/' MOD
 
 %left NEG /* negation--unary minus */
 %left '^' /* string concatenation */
@@ -64,12 +81,24 @@
 %left APPLICATION
 
 %% /* The grammar follows. */
-    input : global_terms
+    input : global_terms {
+        global_result = $1;
+    }
     ;
     global_terms:
-          /* empty */
-        | global_terms global_let_expression
-        | global_terms term DOUBLE_SEMICOLON
+          /* empty */ {
+            $$ = new source_code_t();
+          }
+        | global_terms global_let_expression {
+            $$ = $1;
+        }
+        | global_terms term_seq DOUBLE_SEMICOLON {
+            $$ = $1;
+            $$->splice($$->end(), *$2);
+            delete $2;
+            
+            $$->back().first.push_back(';');
+        }
     ;
     let_declaration:
         VAR_NAME ':' type '=' let_definition {
@@ -116,25 +145,43 @@
         | '(' type ')' { $$ = $2; }
     ;
     term_seq:
-          term
-        | term_seq ';' term
-    term:
-          '(' ')' // unit
-        | '(' term ')'
-        | VAR_NAME
-        | term '+' term
-        | term '-' term
-        | term '*' term
-        | term '/' term
-        | term '^' term
-        | term term %prec APPLICATION
-        | INT_NUM
-        | local_let_expression term
-        | STRING_CONSTANT {
+          term { $$ = $1; }
+        | term ';' term_seq {
+            $$ = $3;
+            $1->back().first.push_back(';');
+            $$->splice($$->begin(), *$1);
             delete $1;
         }
-        | BEGIN term_seq END
+    term:
+          '(' ')' // unit
+        | '(' term ')'  { $$ = $2; }
+        | VAR_NAME
+        | term '+' term { $$ = concatenate_terms_with_operator($1, "+", $3); }
+        | term '-' term { $$ = concatenate_terms_with_operator($1, "-", $3); }
+        | term '*' term { $$ = concatenate_terms_with_operator($1, "*", $3); }
+        | term '/' term { $$ = concatenate_terms_with_operator($1, "/", $3); }
+        | term '^' term { $$ = concatenate_terms_with_operator($1, "+", $3); }
+        | term MOD term { $$ = concatenate_terms_with_operator($1, "+", $3); }
+        | term term %prec APPLICATION
+        | INT_NUM { $$ = new source_code_t({{to_string($1), 0}}); }
+        | local_let_expression term
+        | STRING_CONSTANT {
+            $$ = new source_code_t({{move(*$1), 0}});
+            delete $1;
+        }
+        | BEGIN term_seq END {
+            $$ = $2;
+            $$->push_front({"{", 1});
+            $$->back().first.push_back(';');
+            $$->back().second--;
+            $$->push_back({"}", 0});
+        }
         | if_expr
+        | term AND term { $$ = concatenate_terms_with_operator($1, "&&", $3); }
+        | term OR  term { $$ = concatenate_terms_with_operator($1, "||", $3); }
+        | NOT term { $$ = concatenate_term_with_unary_operator("!", $2); }
+        | TRUE  { $$ = new source_code_t({{"true" , 0}}); }
+        | FALSE { $$ = new source_code_t({{"false", 0}}); }
     ;
     var_arguments:
           VAR_NAME {

@@ -47,6 +47,8 @@
 		<Unit filename="parser.cpp" />
 		<Unit filename="parser.h" />
 		<Unit filename="parser_error.cpp" />
+		<Unit filename="translation.cpp" />
+		<Unit filename="translation.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
