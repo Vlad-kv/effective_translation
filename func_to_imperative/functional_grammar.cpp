@@ -1,4 +1,6 @@
 #include "functional_grammar.h"
+#include "parser.h"
+#include <cassert>
 using namespace std;
 
 const std::string f_type::DEFAULT_VAL = "->";
@@ -92,8 +94,117 @@ void loc_to_string(f_type_sp type, std::string& res, bool is_left) {
     }
 }
 
+bool operator==(const f_type_sp& type_1, const f_type_sp& type_2) {
+    if ((type_1 == nullptr) || (type_2 == nullptr)) {
+        return ((type_1 == nullptr) && (type_2 == nullptr));
+    }
+    if (type_1->val != type_2->val) {
+        return false;
+    }
+    return ((type_1->t_1 == type_2->t_1) && (type_1->t_2 == type_2->t_2));
+}
+bool operator!=(const f_type_sp& type_1, const f_type_sp& type_2) {
+    return (!(type_1 == type_2));
+}
+
 std::string to_string(f_type_sp type) {
     string res;
     loc_to_string(type, res, false);
+    return res;
+}
+
+/// *************************************************
+
+string generate_spaces(int shift) {
+    string res;
+    for (int w = 0; w < shift; w++) {
+        res += "    ";
+    }
+    return res;
+}
+
+void func_to_string(string &res, int shift, real_term &t);
+void func_to_string(string &res, int shift, term_sp t);
+void func_to_string(string &res, int shift, term_seq_sp term_s);
+void func_to_string(string &res, int shift, let_definition &let_def);
+void func_to_string(string &res, int shift, if_def &if_d);
+void func_to_string(string &res, int shift, scope &sc);
+
+void func_to_string(string &res, int shift, scope &sc) {
+    string spaces = generate_spaces(shift);;
+    res += spaces + "begin\n";
+    func_to_string(res, shift + 1, sc.terms);
+    res += spaces + "end\n";
+}
+
+void func_to_string(string &res, int shift, real_term &t) {
+    string spaces = generate_spaces(shift);;
+    if ((t.t_1 == nullptr) && (t.t_2 == nullptr)) {
+        res += spaces + t.val;
+        return;
+    }
+    if (t.t_1 == nullptr) {
+        res += spaces + t.val + "\n";
+        func_to_string(res, shift, t.t_2);
+        return;
+    }
+    assert(t.t_2 != nullptr);
+    res += spaces + "(\n";
+    func_to_string(res, shift + 1, t.t_1);
+    res += spaces + t.val + "\n";
+    func_to_string(res, shift + 1, t.t_2);
+    res += spaces + ")\n";
+}
+
+void func_to_string(string &res, int shift, let_definition &let_def) {
+    string spaces = generate_spaces(shift);;
+    res += spaces + "let " + let_def.name + "\n";
+    for (pair<string, f_type_sp> &w : let_def.arguments) {
+        res += spaces + w.first + " : " + to_string(w.second) + "\n";
+    }
+    res += spaces + "=\n";
+    func_to_string(res, shift + 1, let_def.terms);
+    res += ": " + to_string(let_def.ret_type) + " in\n";
+}
+
+void func_to_string(string &res, int shift, if_def &if_d) {
+    string spaces = generate_spaces(shift);;
+    res += spaces + "if\n";
+    func_to_string(res, shift + 1, if_d.condition);
+    res += spaces + "then\n";
+    func_to_string(res, shift + 1, if_d.if_branch);
+    
+    if (if_d.else_branch != nullptr) {
+        res += spaces + "else\n";
+        func_to_string(res, shift + 1, if_d.else_branch);
+    }
+}
+
+void func_to_string(string &res, int shift, term_sp t) {
+    if (holds_alternative<real_term>(t->data)) {
+        func_to_string(res, shift, get<real_term>(t->data));
+    }
+    if (holds_alternative<let_definition>(t->data)) {
+        func_to_string(res, shift, get<let_definition>(t->data));
+    }
+    if (holds_alternative<if_def>(t->data)) {
+        func_to_string(res, shift, get<if_def>(t->data));
+    }
+    if (holds_alternative<scope>(t->data)) {
+        func_to_string(res, shift, get<scope>(t->data));
+    }
+    
+    res += " : " + to_string(t->type) + "\n";
+}
+
+void func_to_string(string &res, int shift, term_seq_sp term_s) {
+    for (term_sp &w : term_s->terms) {
+        func_to_string(res, shift + 1, w);
+    }
+}
+
+string to_string(term_seq_sp term_s) {
+    string res;
+    func_to_string(res, 0, term_s);
     return res;
 }

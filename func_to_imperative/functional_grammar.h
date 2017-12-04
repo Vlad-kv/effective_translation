@@ -3,17 +3,23 @@
 
 class f_type;
 
+#include <vector>
+#include <variant>
 #include <memory>
 
-typedef std::shared_ptr<f_type> f_type_sp;
+using namespace std;
+
+typedef shared_ptr<f_type> f_type_sp;
 
 class f_type {
 public:
-    static const std::string DEFAULT_VAL;
-    f_type(f_type_sp t_1, f_type_sp t_2, std::string val = DEFAULT_VAL);
-    f_type(std::string str);
+    static const string DEFAULT_VAL;
+    f_type(f_type_sp t_1, f_type_sp t_2, string val = DEFAULT_VAL);
+    f_type(string str);
     
     static f_type_sp create(std::string str);
+    friend bool operator==(const f_type_sp& type_1, const f_type_sp& type_2);
+    friend bool operator!=(const f_type_sp& type_1, const f_type_sp& type_2);
 private:
     friend void loc_to_string(f_type_sp type, std::string& res, bool is_left);
     friend f_type_sp to_f_type(std::string input, int pos);
@@ -22,6 +28,96 @@ private:
     std::string val;
 };
 
-std::string to_string(f_type_sp type);
+string to_string(f_type_sp type);
+
+class real_term;
+
+class term_seq;
+class term;
+class scope;
+
+class let_definition;
+class if_def;
+
+typedef shared_ptr<term> term_sp;
+typedef shared_ptr<let_definition> let_definition_sp;
+typedef shared_ptr<if_def> if_def_sp;
+typedef shared_ptr<term_seq> term_seq_sp;
+
+class let_definition {
+public:
+    let_definition(bool is_rec, string name, vector<pair<string, f_type_sp>>&& arguments, f_type_sp ret_type)
+    : is_rec(is_rec), name(name), arguments(move(arguments)), ret_type(ret_type) {
+    }
+    
+    bool is_rec;
+    string name;
+    vector<pair<string, f_type_sp>> arguments;
+    f_type_sp ret_type;
+    term_seq_sp terms;
+};
+
+class term_seq {
+public:
+    term_seq(vector<term_sp> &&terms)
+    : terms(move(terms)) {
+    }
+    
+    vector<term_sp> terms;
+};
+
+class scope {
+public:
+    scope(term_seq_sp terms)
+    : terms(terms) {
+    }
+    
+    term_seq_sp terms;
+};
+
+class if_def {
+public:
+    if_def(term_sp condition, term_sp if_branch, term_sp else_branch)
+    : condition(condition), if_branch(if_branch), else_branch(else_branch) {
+    }
+    
+    term_sp condition;
+    term_sp if_branch;
+    term_sp else_branch;
+};
+
+class real_term {
+public:
+    real_term(term_sp t_1, const string& val, term_sp t_2)
+    : val(val), t_1(t_1), t_2(t_2) {
+    }
+    
+    string val;
+    term_sp t_1, t_2;
+};
+
+class term {
+public:
+    term(real_term &&r_term, f_type_sp type)
+    : data(r_term), type(type) {
+    }
+    
+    term(let_definition &&let_def, f_type_sp type)
+    : data(let_def), type(type) {
+    }
+    
+    term(if_def &&if_d, f_type_sp type)
+    : data(if_d), type(type) {
+    }
+    
+    term(scope &&sc, f_type_sp type)
+    : data(sc), type(type) {
+    }
+    
+    variant<real_term, let_definition, if_def, scope> data;
+    f_type_sp type;
+};
+
+string to_string(term_seq &term_s);
 
 #endif // FUNCTIONAL_GRAMMAR_H

@@ -10,7 +10,7 @@
 #include <list>
 
 #include "functional_grammar.h"
-
+#include "translation.h"
 using namespace std;
 
 #include "functional_parser.tab.hpp"

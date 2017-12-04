@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1512319184 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
+1512405086 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\lexical_analyzer.cpp
 	<stdio.h>
 	<ctype.h>
 	<string>
@@ -10,40 +10,50 @@
 	<limits>
 	<list>
 	"functional_grammar.h"
+	"translation.h"
 	"functional_parser.tab.hpp"
 
 1511958815 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\test.tab.hpp
 
-1512332541 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\main.cpp
+1512409847 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\main.cpp
 	<iostream>
 	<fstream>
 	<iomanip>
+	<variant>
 	"parser.h"
 
 1511970528 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\grammar.tab.hpp
 
-1512332727 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
+1512420331 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_parser.tab.hpp
 
 1512035642 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser_error.cpp
 	<stdio.h>
 
-1512317308 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser.h
+1512376264 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser.h
 	<iostream>
+	<vector>
 	"translation.h"
 
-1512317303 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser.cpp
+1512382986 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\parser.cpp
 	"parser.h"
+	<iostream>
 
-1512129302 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.cpp
+1512375914 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.cpp
 	"functional_grammar.h"
 
-1512325421 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.h
+1512420072 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\functional_grammar.h
+	<vector>
+	<variant>
 	<memory>
 
-1512319537 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\translation.cpp
+1512384131 source:c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\translation.cpp
 	"translation.h"
+	<map>
+	<string>
+	"parser.h"
 
-1512318413 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\translation.h
+1512389164 c:\users\vlad_kv\documents\github\effective_translation\func_to_imperative\translation.h
 	<list>
 	<iostream>
+	"functional_grammar.h"
 
