@@ -58,7 +58,10 @@ const map<string, int> DOUBLE_SUMBOLS = {
     {";;", DOUBLE_SEMICOLON},
     {"->", ARROW},
     {"||", OR},
-    {"&&", AND}
+    {"&&", AND},
+    {"<>", NOT_EQUAL},
+    {"<=", LESS_OR_EQUAL},
+    {">=", MORE_OR_EQUAL}
 };
 bool is_special_sumbol(char c) {
     return SPECIAL_SUMBOLS.count(c) > 0;
@@ -87,6 +90,7 @@ int yylex() {
                 *yylval.string_ptr_val = move(buff);
                 return STRING_CONSTANT;
             }
+            buff.push_back(c);
         }
     }
     if (isdigit(c)) {

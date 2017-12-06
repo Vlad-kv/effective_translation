@@ -1,12 +1,12 @@
-#include "parser.h"
 #include <iostream>
-int yyparse();
+#include "parser.h"
 
 using namespace std;
+int yyparse();
 
 std::vector<std::string> parser_errors;
 
-source_code_t parse(std::istream *input, std::ostream *output) {
+term_seq_sp parse(std::istream *input, std::ostream *output) {
     input_stream = input;
     output_stream = output;
     
@@ -14,7 +14,7 @@ source_code_t parse(std::istream *input, std::ostream *output) {
         throw std::runtime_error("Parser failed.");
     }
     if (parser_errors.size() > 0) {
-        delete global_result;
+        global_result = nullptr;
         
         cout << "Errors:\n";
         for (auto &s : parser_errors) {
@@ -22,7 +22,5 @@ source_code_t parse(std::istream *input, std::ostream *output) {
         }
         throw std::runtime_error("Parser failed.");
     }
-    source_code_t res(move(*global_result));
-    delete global_result;
-    return res;
+    return global_result;
 }

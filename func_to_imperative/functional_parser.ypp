@@ -29,6 +29,12 @@
     
     source_code_t *source_code_ptr_val;
     code_and_type_t *code_and_type_val;
+    
+    
+    term *term_ptr_val;
+    term_seq *term_seq_ptr_val;
+    
+    let_definition *let_definition_ptr_val;
 }
 
 %token <int_val> INT_NUM
@@ -59,17 +65,27 @@
 
 %token UNFINISHED_STRING
 
-/*
+
 %type <str_vector_ptr_val> var_arguments
 %type <f_type_ptr_val> type
 
-%type <source_code_ptr_val> global_terms
-%type <code_and_type_val> term
-%type <source_code_ptr_val> term_seq
-*/
+%type <term_seq_ptr_val> global_terms
+%type <term_ptr_val> term
+%type <term_seq_ptr_val> term_seq
+
+%type <term_ptr_val> if_expr
+%type <term_ptr_val> if_else
+
+%type <let_definition_ptr_val> let_definition
+%type <term_ptr_val> let_expression
+%type <term_ptr_val> global_let_expression
+%type <term_ptr_val> local_let_expression
+
 %right ARROW
 
-%left '<' '>'
+%left '=' NOT_EQUAL
+
+%left '<' LESS_OR_EQUAL '>' MORE_OR_EQUAL
 %left OR
 %left AND
 
@@ -82,61 +98,60 @@
 %left APPLICATION
 
 %% /* The grammar follows. */
-    input : OR
-    // {
-    //    global_result = $1;
-    //}
+    input : global_terms { global_result = term_seq_sp($1); }
     ;
-/*
     global_terms:
             //empty 
             {
-            $$ = new source_code_t();
+            $$ = new term_seq();
           }
         | global_terms global_let_expression {
             $$ = $1;
+            $$->terms.push_back(term_sp($2));
         }
         | global_terms term_seq DOUBLE_SEMICOLON {
             $$ = $1;
-            $$->splice($$->end(), *$2);
+            move($2->terms.begin(), $2->terms.end(), back_inserter($$->terms));
             delete $2;
-            
-            $$->back().first.push_back(';');
-        }
-    ;
-    let_declaration:
-        VAR_NAME ':' type '=' let_definition {
-            f_type_sp t($3);
-            
-            *output_stream << "definition:\n"
-                << "  VAR_NAME: " << *$1 << "\n"
-                << "  type: " << to_string(t) << "\n";
-            delete $1;
         }
     ;
     let_definition:
-          FUN var_arguments ARROW term_seq {
-          }
-        | term_seq
+        VAR_NAME ':' type '=' FUN var_arguments ARROW term_seq {
+            $$ = new let_definition(false, *$1, move(*$6), f_type_sp($3), term_seq_sp($8));
+            delete $1;
+            delete $6;
+        }
+        | VAR_NAME ':' type '=' term_seq {
+            $$ = new let_definition(false, *$1, vector<string>(), f_type_sp($3), term_seq_sp($5));
+            delete $1;
+        }
     ;
     let_expression:
-          LET let_declaration
-        | LET REC let_declaration
+          LET let_definition {
+            $$ = new term(let_definition_sp($2), f_type::create("unit"));
+        }
+        | LET REC let_definition {
+            $3->is_rec = true;
+            $$ = new term(let_definition_sp($3), f_type::create("unit"));
+        }
     ;
     global_let_expression:
-        let_expression DOUBLE_SEMICOLON {
-        }
+        let_expression DOUBLE_SEMICOLON { $$ = $1; }
     ;
     local_let_expression:
-        let_expression IN {
-        }
+        let_expression IN { $$ = $1; }
     ;
     if_expr:
-          IF term THEN term if_else
+          IF term THEN term if_else {
+              $$ = new term({term_sp($2), term_sp($4), term_sp($5)}, $2->type);
+          }
     ;
     if_else:
           // empty
-        | ELSE term
+          { $$ = new term(real_term({nullptr, "", nullptr}), f_type::create("unit"));; }
+        | ELSE term {
+            $$ = $2;
+        }
     ;
     type:
           UNIT     { $$ = new f_type(nullptr, nullptr, "unit"  ); }
@@ -149,43 +164,58 @@
         | '(' type ')' { $$ = $2; }
     ;
     term_seq:
-          term { $$ = $1; }
-        | term ';' term_seq {
-            $$ = $3;
-            $1->back().first.push_back(';');
-            $$->splice($$->begin(), *$1);
-            delete $1;
+          term {
+            $$ = new term_seq({term_sp($1)});
+        }
+        | term_seq ';' term {
+            $$ = $1;
+            $$->terms.push_back(term_sp($3));
         }
     term:
-          '(' ')' // unit
+          '(' ')'  { $$ = new term(real_term({nullptr, "", nullptr}), f_type::create("unit")); }
         | '(' term ')'  { $$ = $2; }
-        | VAR_NAME
-        | term '+' term { $$ = concatenate_terms_with_operator($1, "+", $3); }
-        | term '-' term { $$ = concatenate_terms_with_operator($1, "-", $3); }
-        | term '*' term { $$ = concatenate_terms_with_operator($1, "*", $3); }
-        | term '/' term { $$ = concatenate_terms_with_operator($1, "/", $3); }
-        | term '^' term { $$ = concatenate_terms_with_operator($1, "+", $3); }
-        | term MOD term { $$ = concatenate_terms_with_operator($1, "%", $3); }
-        | term term %prec APPLICATION
-        | INT_NUM { $$ = new source_code_t({{to_string($1), 0}}); }
-        | local_let_expression term
-        | STRING_CONSTANT {
-            $$ = new source_code_t({{{move(*$1), 0}}, f_type::create("string")});
+        | VAR_NAME {
+            $$ = new term({move(*$1)}, nullptr);
             delete $1;
         }
-//        | BEGIN term_seq END {
-//            $$ = $2;
-//            $$->push_front({"{", 1});
-//            $$->back().first.push_back(';');
-//            $$->back().second--;
-//            $$->push_back({"}", 0});
-//        }
-        | if_expr
-        | term AND term { $$ = concatenate_terms_with_operator($1, "&&", $3); }
-        | term OR  term { $$ = concatenate_terms_with_operator($1, "||", $3); }
-        | NOT term { $$ = concatenate_term_with_unary_operator("!", $2); }
-        | TRUE  { $$ = new code_and_type_t({{{"true" , 0}}, f_type::create("bool")}); }
-        | FALSE { $$ = new code_and_type_t({{{"false", 0}}, f_type::create("bool")}); }
+        | term '+' term { $$ = new term({term_sp($1), "+", term_sp($3)}, f_type::create("int")); }
+        | term '-' term { $$ = new term({term_sp($1), "-", term_sp($3)}, f_type::create("int")); }
+        | term '*' term { $$ = new term({term_sp($1), "*", term_sp($3)}, f_type::create("int")); }
+        | term '/' term { $$ = new term({term_sp($1), "/", term_sp($3)}, f_type::create("int")); }
+        | term '^' term { $$ = new term({term_sp($1), "+", term_sp($3)}, f_type::create("string")); }
+        | term MOD term { $$ = new term({term_sp($1), "%", term_sp($3)}, f_type::create("int")); }
+        | term term %prec APPLICATION {
+            $$ = new term({term_sp($1), "APP", term_sp($2)}, nullptr);
+        }
+        | INT_NUM { $$ = new term(real_term({nullptr, to_string($1), nullptr}), f_type::create("int")); }
+        | local_let_expression term_seq {
+            vector<term_sp> new_v({term_sp($1)});
+            for (term_sp &w : $2->terms) {
+                new_v.push_back(move(w));
+            }
+            $2->terms = move(new_v);
+            
+            $$ = new term({term_seq_sp($2)}, $2->terms.back()->type);
+        }
+        | STRING_CONSTANT {
+            $$ = new term(real_term({nullptr, move(*$1), nullptr}), f_type::create("string"));
+            delete $1;
+        }
+        | BEGIN term_seq END {
+            $$ = new term({term_seq_sp($2)}, $2->terms.back()->type);
+        }
+        | if_expr { $$ = $1; }
+        | term AND term { $$ = new term({term_sp($1), "&&", term_sp($3)}, f_type::create("bool")); }
+        | term OR  term { $$ = new term({term_sp($1), "||", term_sp($3)}, f_type::create("bool")); }
+        
+        | term '='            term { $$ = new term({term_sp($1), "==", term_sp($3)}, f_type::create("bool")); }
+        | term NOT_EQUAL      term { $$ = new term({term_sp($1), "!=", term_sp($3)}, f_type::create("bool")); }
+        | term LESS_OR_EQUAL  term { $$ = new term({term_sp($1), "<=", term_sp($3)}, f_type::create("bool")); }
+        | term MORE_OR_EQUAL  term { $$ = new term({term_sp($1), ">=", term_sp($3)}, f_type::create("bool")); }
+        
+        | NOT term { $$ = new term(real_term({nullptr, "!", term_sp($2)}), f_type::create("bool")); }
+        | TRUE  { $$ = new term(real_term({nullptr, "true", nullptr}), f_type::create("bool")); }
+        | FALSE { $$ = new term(real_term({nullptr, "false", nullptr}), f_type::create("bool")); }
     ;
     var_arguments:
           VAR_NAME {
@@ -198,5 +228,4 @@
             delete $2;
         }
     ;
-*/
 %%

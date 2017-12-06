@@ -41,3 +41,4 @@ func_to_imperative/functional_parser.tab.hpp
 func_to_imperative/func_to_imperative.layout
 func_to_imperative/input.txt
 func_to_imperative/output.txt
+func_to_imperative/func_to_imperative.depend

@@ -3,7 +3,7 @@
 #include <string>
 #include "parser.h"
 using namespace std;
-source_code_t *global_result = nullptr;
+term_seq_sp global_result = nullptr;
 
 const map<string, pair<string, f_type_sp>> operators = {
     {"+", {"+", f_type::create("int")}},
