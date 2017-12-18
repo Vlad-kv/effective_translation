@@ -3,9 +3,7 @@
 #include <cassert>
 using namespace std;
 
-const std::string f_type::DEFAULT_VAL = "->";
-
-f_type::f_type(f_type_sp t_1, f_type_sp t_2, std::string val)
+f_type::f_type(f_type_sp t_1, f_type_sp t_2, string val)
 : t_1(t_1), t_2(t_2), val(val) {
 }
 
@@ -57,7 +55,7 @@ f_type_sp to_f_type(std::string &input, size_t &pos) {
                         + " in " + input);
 }
 
-f_type_sp f_type::create(std::string str) {
+f_type_sp f_type::create(string str) {
     size_t pos = 0;
     f_type_sp res = to_f_type(str, pos);
     skip_spaces(str, pos);
@@ -197,9 +195,6 @@ void func_to_string(string &res, int shift, term_sp t) {
     if (holds_alternative<real_term>(t->data)) {
         func_to_string(res, shift, get<real_term>(t->data));
     }
-    if (holds_alternative<let_definition_sp>(t->data)) {
-        func_to_string(res, shift, get<let_definition_sp>(t->data));
-    }
     if (holds_alternative<if_def>(t->data)) {
         func_to_string(res, shift, get<if_def>(t->data));
     }
@@ -217,8 +212,12 @@ void func_to_string(string &res, int shift, term_sp t) {
 }
 
 void func_to_string(string &res, int shift, term_seq_sp term_s) {
-    for (term_sp &w : term_s->terms) {
-        func_to_string(res, shift + 1, w);
+    for (variant<term_sp, let_definition_sp> &w : term_s->terms) {
+        if (holds_alternative<term_sp>(w)) {
+            func_to_string(res, shift + 1, get<term_sp>(w));
+        } else {
+            func_to_string(res, shift + 1, get<let_definition_sp>(w));
+        }
     }
 }
 

@@ -33,7 +33,7 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="bison -d functional_parser.ypp" />
+			<Add before="mingw32-make" />
 		</ExtraCommands>
 		<Unit filename="functional_grammar.cpp" />
 		<Unit filename="functional_grammar.h" />
@@ -47,6 +47,8 @@
 		<Unit filename="parser.cpp" />
 		<Unit filename="parser.h" />
 		<Unit filename="parser_error.cpp" />
+		<Unit filename="preparation.cpp" />
+		<Unit filename="preparation.h" />
 		<Unit filename="translation.cpp" />
 		<Unit filename="translation.h" />
 		<Extensions>

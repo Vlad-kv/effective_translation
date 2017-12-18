@@ -33,7 +33,7 @@ public:
     f_type(f_type_sp t_1, f_type_sp t_2, string val = DEFAULT_VAL);
     f_type(string str);
     
-    static f_type_sp create(std::string str);
+    static f_type_sp create(string str);
     friend bool operator==(const f_type_sp& type_1, const f_type_sp& type_2);
     friend bool operator!=(const f_type_sp& type_1, const f_type_sp& type_2);
 //private:
@@ -54,10 +54,10 @@ public:
     
     let_definition(bool is_rec, string& name, vector<string>&& arguments_names, f_type_sp raw_type, term_seq_sp terms)
     : is_rec(is_rec), name(name), terms(terms) {
-        f_type_sp original_type = raw_type;
+        full_type = raw_type;
         for (string &w : arguments_names) {
             if (raw_type->val != f_type::DEFAULT_VAL) { // fatal error
-                parser_errors.push_back("wrong number of arguments for type " + to_string(original_type));
+                parser_errors.push_back("wrong number of arguments for type " + to_string(full_type));
                 break;
             }
             arguments.push_back({w, raw_type->t_1});
@@ -69,7 +69,7 @@ public:
     bool is_rec;
     string name;
     vector<pair<string, f_type_sp>> arguments;
-    f_type_sp ret_type;
+    f_type_sp ret_type, full_type;
     term_seq_sp terms;
 };
 
@@ -77,11 +77,11 @@ class term_seq {
 public:
     term_seq() {
     }
-    term_seq(vector<term_sp> &&terms)
+    term_seq(vector<variant<term_sp, let_definition_sp>> &&terms)
     : terms(move(terms)) {
     }
     
-    vector<term_sp> terms;
+    vector<variant<term_sp, let_definition_sp>> terms;
 };
 
 class scope {
@@ -128,10 +128,6 @@ public:
     : data(r_term), type(type) {
     }
     
-    term(let_definition_sp &&let_def, f_type_sp type)
-    : data(let_def), type(type) {
-    }
-    
     term(if_def &&if_d, f_type_sp type)
     : data(if_d), type(type) {
     }
@@ -144,7 +140,7 @@ public:
     : data(var_n), type(type) {
     }
     
-    variant<real_term, let_definition_sp, if_def, scope, var_name> data;
+    variant<real_term, if_def, scope, var_name> data;
     f_type_sp type;
 };
 
