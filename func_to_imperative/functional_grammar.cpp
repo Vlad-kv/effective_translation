@@ -109,6 +109,34 @@ bool operator!=(const f_type_sp& type_1, const f_type_sp& type_2) {
     return (!(type_1 == type_2));
 }
 
+int lok_f_type_comp(const f_type_sp& type_1, const f_type_sp& type_2) {
+    if ((type_1 == nullptr) && (type_2 != nullptr)) {
+        return -1;
+    }
+    if ((type_1 != nullptr) && (type_2 == nullptr)) {
+        return 1;
+    }
+    if ((type_1 == nullptr) && (type_2 == nullptr)) {
+        return 0;
+    }
+    
+    if (type_1->val < type_2->val) {
+        return -1;
+    }
+    if (type_1->val > type_2->val) {
+        return 1;
+    }
+    int res = lok_f_type_comp(type_1->t_1, type_2->t_1);
+    if (res != 0) {
+        return res;
+    }
+    return lok_f_type_comp(type_1->t_2, type_2->t_2);
+}
+
+bool operator <(const f_type_sp& type_1, const f_type_sp& type_2) {
+    return (lok_f_type_comp(type_1, type_2) < 0);
+}
+
 std::string to_string(f_type_sp type) {
     string res;
     loc_to_string(type, res, false);

@@ -36,6 +36,8 @@ public:
     static f_type_sp create(string str);
     friend bool operator==(const f_type_sp& type_1, const f_type_sp& type_2);
     friend bool operator!=(const f_type_sp& type_1, const f_type_sp& type_2);
+    friend bool operator <(const f_type_sp& type_1, const f_type_sp& type_2);
+    
 //private:
     friend void loc_to_string(f_type_sp type, std::string& res, bool is_left);
     friend f_type_sp to_f_type(std::string input, int pos);

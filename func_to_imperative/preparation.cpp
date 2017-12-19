@@ -7,26 +7,48 @@
 const std::string f_type::DEFAULT_VAL = "->";
 
 namespace {
-    const map<string, pair<string, f_type_sp>> binary_operators = {
-        {"+", {"+", f_type::create("int")}},
-        {"-", {"-", f_type::create("int")}},
-        {"*", {"*", f_type::create("int")}},
-        {"/", {"/", f_type::create("int")}},
-        {"%", {"%", f_type::create("int")}},
+    struct operator_t {
+        operator_t(string disp, string res_t, vector<string> op_t)
+        : disp(disp), res_t(f_type::create(res_t)) {
+            for (string &w : op_t) {
+                op_types.insert(f_type::create(w));
+            }
+        }
+        operator_t(string disp, string res_t)
+        : disp(disp), res_t(f_type::create(res_t)) {
+            op_types.insert(this->res_t);
+        }
         
-        {"==", {"==", f_type::create("bool")}},
-        {"!=", {"!=", f_type::create("bool")}},
-        {"<=", {"<=", f_type::create("bool")}},
-        {">=", {">=", f_type::create("bool")}},
+        struct comparator {
+            bool operator()(const f_type_sp& type_1, const f_type_sp& type_2) const {
+                return (type_1 < type_2);
+            }
+        };
         
-        {"&&", {"&&", f_type::create("bool")}},
-        {"||", {"||", f_type::create("bool")}},
-        {"^", {"+", f_type::create("string")}}
+        string disp;
+        f_type_sp res_t;
+        set<f_type_sp, comparator> op_types;
+    };
+    const map<string, operator_t> binary_operators = {
+        {"+", {"+", "int"}},
+        {"-", {"-", "int"}},
+        {"*", {"*", "int"}},
+        {"/", {"/", "int"}},
+        {"%", {"%", "int"}},
+        
+        {"==", {"==", "bool", {"int", "string", "bool"}}},
+        {"!=", {"!=", "bool", {"int", "string", "bool"}}},
+        {"<=", {"<=", "bool", {"int", "string", "bool"}}},
+        {">=", {">=", "bool", {"int", "string", "bool"}}},
+        
+        {"&&", {"&&", "bool"}},
+        {"||", {"||", "bool"}},
+        {"^" , {"+" , "string"}}
     };
     
-    const map<string, pair<string, f_type_sp>> unary_operators = {
-        {"not", {"!", f_type::create("bool")}},
-        {"-"  , {"-", f_type::create("int")}}
+    const map<string, operator_t> unary_operators = {
+        {"not", {"!", "bool"}},
+        {"-"  , {"-", "int"}}
     };
     const map<string, pair<string, f_type_sp>> standart_functions = {
         {"print_string", {"print_string", f_type::create("string -> unit")}},
@@ -78,6 +100,7 @@ namespace {
     void upd_name(string &to_update) {
         assert(visible_vars.count(to_update) > 0);
         int level = visible_vars[to_update].nesting_level;
+        
         if (level > 0) {
             to_update += "_" + to_string(level);
         }
@@ -97,14 +120,14 @@ namespace {
             }
             if ((r_term.t_1 == nullptr) && (r_term.t_2 != nullptr)) {
                 if (unary_operators.count(r_term.val) > 0)  {
-                    const pair<string, f_type_sp> &p = (*unary_operators.find(r_term.val)).second;
-                    if (p.second != r_term.t_2->type) {
-                        throw runtime_error("Incompatible types for unary operator " + p.first +
+                    const operator_t &op = (*unary_operators.find(r_term.val)).second;
+                    if (op.op_types.count(r_term.t_2->type) == 0) {
+                        throw runtime_error("Incompatible types for unary operator " + op.disp +
                                             " : " + to_string(r_term.t_2->type));
                     }
-                    r_term.val = p.first;
+                    r_term.val = op.disp;
                     
-                    t->type = p.second;
+                    t->type = op.res_t;
                     return;
                 } else {
                     throw runtime_error("fatal error in update(term_sp t)");
@@ -123,16 +146,15 @@ namespace {
                 return;
             }
             if (binary_operators.count(r_term.val) > 0) {
-                const pair<string, f_type_sp> &p = (*binary_operators.find(r_term.val)).second;
-                r_term.val = p.first;
+                const operator_t &op = (*binary_operators.find(r_term.val)).second;
+                r_term.val = op.disp;
                 
-                if ((r_term.t_1->type != r_term.t_2->type) || (r_term.t_1->type != p.second)) {
-                    throw runtime_error("Incompatible types for binary operator " + p.first +
-                                        " of type " + to_string(p.second) + " : " +
-                                        to_string(r_term.t_1->type) + "  and  " +
+                if ((r_term.t_1->type != r_term.t_2->type) || (op.op_types.count(r_term.t_1->type) == 0)) {
+                    throw runtime_error("Incompatible types for binary operator " + op.disp +
+                                        " : " + to_string(r_term.t_1->type) + "  and  " +
                                         to_string(r_term.t_2->type));
                 }
-                t->type = p.second;
+                t->type = op.res_t;
                 return;
             } else {
                 throw runtime_error("fatal error : unknown operator " + r_term.val);
