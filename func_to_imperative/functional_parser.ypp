@@ -71,6 +71,7 @@
 
 %type <term_seq_ptr_val> global_terms
 %type <term_ptr_val> term
+%type <term_ptr_val> term_app
 %type <term_seq_ptr_val> term_seq
 
 %type <term_ptr_val> if_expr
@@ -83,6 +84,8 @@
 
 %right ARROW
 
+%left APPLICATION
+
 %left '=' NOT_EQUAL
 
 %left '<' LESS_OR_EQUAL '>' MORE_OR_EQUAL
@@ -94,8 +97,6 @@
 
 %left NEG /* negation--unary minus */
 %left '^' /* string concatenation */
-
-%left APPLICATION
 
 %% /* The grammar follows. */
     input : global_terms { global_result = term_seq_sp($1); }
@@ -142,14 +143,14 @@
         let_expression IN { $$ = $1; }
     ;
     if_expr:
-          IF term THEN term if_else {
+          IF term_app THEN term_app if_else {
               $$ = new term({term_sp($2), term_sp($4), term_sp($5)}, $2->type);
           }
     ;
     if_else:
           // empty
           { $$ = new term(real_term({nullptr, "", nullptr}), f_type::create("unit"));; }
-        | ELSE term {
+        | ELSE term_app {
             $$ = $2;
         }
     ;
@@ -164,16 +165,25 @@
         | '(' type ')' { $$ = $2; }
     ;
     term_seq:
-          term {
+          term_app {
             $$ = new term_seq({term_sp($1)});
         }
-        | term_seq ';' term {
+        | term_seq ';' term_app {
             $$ = $1;
             $$->terms.push_back(term_sp($3));
         }
+    ;
+    term_app:
+          term {
+            $$ = $1;
+        }
+        | term_app term %prec APPLICATION {
+            $$ = new term({term_sp($1), "APP", term_sp($2)}, nullptr);
+        }
+    ;
     term:
           '(' ')'  { $$ = new term(real_term({nullptr, "", nullptr}), f_type::create("unit")); }
-        | '(' term ')'  { $$ = $2; }
+        | '(' term_app ')'  { $$ = $2; }
         | VAR_NAME {
             $$ = new term({move(*$1)}, nullptr);
             delete $1;
@@ -184,9 +194,7 @@
         | term '/' term { $$ = new term({term_sp($1), "/", term_sp($3)}, f_type::create("int")); }
         | term '^' term { $$ = new term({term_sp($1), "^", term_sp($3)}, f_type::create("string")); }
         | term MOD term { $$ = new term({term_sp($1), "%", term_sp($3)}, f_type::create("int")); }
-        | term term %prec APPLICATION {
-            $$ = new term({term_sp($1), "APP", term_sp($2)}, nullptr);
-        }
+        
         | INT_NUM { $$ = new term(real_term({nullptr, to_string($1), nullptr}), f_type::create("int")); }
         | local_let_expression term_seq {
             vector<variant<term_sp, let_definition_sp>> new_v({let_definition_sp($1)});
