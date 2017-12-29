@@ -28,8 +28,6 @@
     f_type *f_type_ptr_val;
     
     source_code_t *source_code_ptr_val;
-    code_and_type_t *code_and_type_val;
-    
     
     term *term_ptr_val;
     term_seq *term_seq_ptr_val;
@@ -222,6 +220,7 @@
         | term MORE_OR_EQUAL  term { $$ = new term({term_sp($1), ">=", term_sp($3)}, f_type::create("bool")); }
         
         | NOT term { $$ = new term(real_term({nullptr, "not", term_sp($2)}), f_type::create("bool")); }
+        | '-' term %prec NEG { $$ = new term(real_term({nullptr, "-", term_sp($2)}), f_type::create("int")); }
         | TRUE  { $$ = new term(real_term({nullptr, "true", nullptr}), f_type::create("bool")); }
         | FALSE { $$ = new term(real_term({nullptr, "false", nullptr}), f_type::create("bool")); }
     ;
