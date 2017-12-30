@@ -124,6 +124,47 @@ int yylex() {
     if (DOUBLE_SUMBOLS.count(str) > 0) {
         return (*DOUBLE_SUMBOLS.find(str)).second;
     }
+    
+    if ((c == '(') && (next_char == '*')) { // comments
+        int delta = 1;
+        char prev;
+        c = input_stream->get();
+        
+        while (true) {
+            prev = c;
+            if (c == char_traits<char>::eof()) {
+                return UNFINISHED_STRING;
+            }
+            if (c == '\"') { // string in comments
+                char prev = 0;
+                while (true) {
+                    prev = c;
+                    if (c == char_traits<char>::eof()) {
+                        return UNFINISHED_STRING;
+                    }
+                    c = input_stream->get();
+                    if ((prev != '\\') && (c == '\"')) {
+                        break;
+                    }
+                }
+                c = input_stream->get();
+                continue;
+            }
+            c = input_stream->get();
+            if ((prev == '(') && (c == '*')) {
+                delta++;
+                prev = 0; // (*)
+            }
+            if ((prev == '*') && (c == ')')) {
+                delta--;
+                
+                if (delta == 0) {
+                    return yylex();
+                }
+            }
+        }
+    }
+    
     input_stream->unget();
     return c;
 }
