@@ -45,7 +45,7 @@ string to_cpp_type(f_type_sp t) {
     return "function<" + t->val + " (" + arguments + ")>";
 }
 
-source_code_t translate(term_seq_sp terms);
+source_code_t translate(term_seq_sp terms, bool to_return);
 source_code_t translate(term_sp t, var_holder &holder);
 
 source_code_t translate(if_def &if_d, var_holder &holder) {
@@ -63,16 +63,16 @@ source_code_t translate(scope &sc, f_type_sp ret_type) {
     
     res.push_back({"[&]() {", 1});
     
-    if (ret_type != f_type::create("unit")) {
-        res.push_back({"return", 1});
-    }
-    res.splice(res.end(), translate(sc.terms));
-    res.back().first.append(";");
+//    if (ret_type != f_type::create("unit")) {
+//        res.push_back({"return", 1});
+//    }
+    res.splice(res.end(), translate(sc.terms, ret_type != f_type::create("unit")));
+//    res.back().first.append(";");
     res.back().second--;
     
-    if (ret_type != f_type::create("unit")) {
-        res.back().second--;
-    }
+//    if (ret_type != f_type::create("unit")) {
+//        res.back().second--;
+//    }
     res.push_back({"} ()", 0});
     return res;
 }
@@ -159,15 +159,8 @@ source_code_t translate(let_definition_sp let_def, var_holder &holder) {
     
     res.push_back({first_line, 1});
     
-    if (let_def->ret_type != f_type::create("unit")) {
-        res.push_back({"return", 1});
-    }
-    res.splice(res.end(), translate(let_def->terms));
-    res.back().first.append(";");
+    res.splice(res.end(), translate(let_def->terms, let_def->ret_type != f_type::create("unit")));
     
-    if (let_def->ret_type != f_type::create("unit")) {
-        res.back().second--;
-    }
     res.back().second--;
     res.push_back({"})", 0});
     
@@ -196,23 +189,27 @@ source_code_t translate(term_seq_sp terms, bool to_return) {
     var_holder holder;
     
     source_code_t res;
-    for (variant<term_sp, let_definition_sp> &w : terms->terms) {
-        if (res.size() > 0) {
-            res.back().first.append(",");
+    for (int e = 0; e < terms->terms.size(); e++) {
+        if ((to_return) && (e == terms->terms.size() - 1)) {
+            res.push_back({"return", 1});
         }
+        variant<term_sp, let_definition_sp> &w = terms->terms[e];
         if (holds_alternative<term_sp>(w)) {
             res.splice(res.end(), translate(get<term_sp>(w), holder));
         } else {
             res.splice(res.end(), translate(get<let_definition_sp>(w), holder));
+        }
+        res.back().first.append(";");
+        
+        if ((to_return) && (e == terms->terms.size() - 1)) {
+            res.back().second--;
         }
     }
     return res;
 }
 
 source_code_t convert(term_seq_sp terms) {
-    source_code_t res = translate(terms, false);
-    res.back().first.append(";");
-    return res;
+    return translate(terms, false);
 }
 
 string to_string(source_code_t source_code) {
