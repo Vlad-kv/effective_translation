@@ -63,16 +63,9 @@ source_code_t translate(scope &sc, f_type_sp ret_type) {
     
     res.push_back({"[&]() {", 1});
     
-//    if (ret_type != f_type::create("unit")) {
-//        res.push_back({"return", 1});
-//    }
     res.splice(res.end(), translate(sc.terms, ret_type != f_type::create("unit")));
-//    res.back().first.append(";");
     res.back().second--;
     
-//    if (ret_type != f_type::create("unit")) {
-//        res.back().second--;
-//    }
     res.push_back({"} ()", 0});
     return res;
 }
@@ -83,7 +76,7 @@ source_code_t translate(real_term &t, var_holder &holder) {
     if (t.t_1 == nullptr) {
         source_code_t sub_res = translate(t.t_2, holder);
         if (sub_res.size() == 1) {
-            return {{t.val + sub_res.front().first, 0}};
+            return {{"(" + t.val + sub_res.front().first + ")", 0}};
         }
         source_code_t res({{t.val, 0}});
         res.splice(res.end(), sub_res);
@@ -208,8 +201,18 @@ source_code_t translate(term_seq_sp terms, bool to_return) {
     return res;
 }
 
-source_code_t convert(term_seq_sp terms) {
-    return translate(terms, false);
+source_code_t generate_working_cpp(term_seq_sp terms) {
+    source_code_t res({
+        {"#include <iostream>", 0},
+        {"#include <functional>", 0},
+        {"using namespace std;", 0},
+        {"int main() {", 1}
+    });
+    res.splice(res.end(), translate(terms, false));
+    
+    res.push_back({"return 0;", -1});
+    res.push_back({"}", 0});
+    return res;
 }
 
 string to_string(source_code_t source_code) {

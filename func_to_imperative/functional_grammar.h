@@ -50,9 +50,6 @@ string to_string(f_type_sp type);
 
 class let_definition {
 public:
-//    let_definition(bool is_rec, string& name, vector<pair<string, f_type_sp>>&& arguments, f_type_sp ret_type, term_seq_sp terms)
-//    : is_rec(is_rec), name(name), arguments(move(arguments)), ret_type(ret_type), terms(terms) {
-//    }
     
     let_definition(bool is_rec, string& name, vector<string>&& arguments_names, f_type_sp raw_type, term_seq_sp terms)
     : is_rec(is_rec), name(name), terms(terms) {
