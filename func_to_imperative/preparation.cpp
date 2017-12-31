@@ -8,8 +8,7 @@ const std::string f_type::DEFAULT_VAL = "->";
 
 const map<string, lib_func_info> standart_functions = {
     {"print_string", 
-        {   "print_string",
-            {   {"void print_string(const string& str) {", 1},
+        {   {   {"void print_string(const string& str) {", 1},
                 {"cout << str;", -1},
                 {"}", 0}
             },
@@ -17,8 +16,7 @@ const map<string, lib_func_info> standart_functions = {
         }
     },
     {"print_int",
-        {   "print_int",
-            {   {"void print_int(int i) {", 1},
+        {   {   {"void print_int(int i) {", 1},
                 {"cout << i;", -1},
                 {"}", 0}
             },
@@ -26,8 +24,7 @@ const map<string, lib_func_info> standart_functions = {
         }
     },
     {"read_int",
-        {   "read_int",
-            {   {"int read_int() {", 1},
+        {   {   {"int read_int() {", 1},
                 {"int res;", 0},
                 {"cin >> res;", 0},
                 {"return res;", -1},
@@ -37,8 +34,10 @@ const map<string, lib_func_info> standart_functions = {
         }
     },
     {"string_of_int",
-        {   "to_string",
-            {},
+        {   {   {"string string_of_int(int val) {", 1},
+                {"return to_string(val);", -1},
+                {"}", 0}
+            },
             f_type::create("int -> string")
         }
     }

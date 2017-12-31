@@ -25,7 +25,7 @@ else
 	()
 ;;
 
-(* if (true = false) then
+if (true = false) then
     let str_1 : string = "fatal" in
     let str_2 : string = "error" in
     print_string str_1;
@@ -33,7 +33,7 @@ else
     print_string "!\n"
 else
     print_string "OK\n"
-;; *)
+;;
 
 true <> false;;
 

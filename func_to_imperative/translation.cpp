@@ -41,9 +41,26 @@ string to_cpp_type(f_type_sp t) {
             arguments += ", ";
         }
         arguments += to_cpp_type(t->t_1);
-        t = t->t_1;
+        t = t->t_2;
     }
     return "function<" + t->val + " (" + arguments + ")>";
+}
+
+void add_code(source_code_t &res, source_code_t &&to_add) {
+    if (to_add.size() == 1) {
+        res.back().first += to_add.front().first;
+    } else {
+        res.back().second++;
+        res.splice(res.end(), to_add);
+        res.back().second--;
+    }
+}
+void add_code(source_code_t &res, string str) {
+    if (res.back().second == 0) {
+        res.back().first += str;
+    } else {
+        res.push_back({str, 0});
+    }
 }
 
 source_code_t translate(term_seq_sp terms, bool to_return);
@@ -52,12 +69,10 @@ source_code_t translate(term_sp t, var_holder &holder);
 source_code_t translate(if_def &if_d, var_holder &holder) {
     source_code_t res;
     if (if_d.if_branch->type == f_type::create("unit")) {
-        res.push_back({"if (", 1});
-        
-        res.splice(res.end(), translate(if_d.condition, holder));
-        
-        res.back().second--;
-        res.push_back({") {", 1});
+        res.push_back({"if (", 0});
+        add_code(res, translate(if_d.condition, holder));
+        add_code(res, ") {");
+        res.back().second++;
         
         res.splice(res.end(), translate(if_d.if_branch, holder));
         
@@ -71,12 +86,10 @@ source_code_t translate(if_def &if_d, var_holder &holder) {
         res.back().second--;
         res.push_back({"}", 0});
     } else {
-        res.push_back({"(", 1});
-        
-        res.splice(res.end(), translate(if_d.condition, holder));
-        
-        res.back().second--;
-        res.push_back({")?", 1});
+        res.push_back({"(", 0});
+        add_code(res, translate(if_d.condition, holder));
+        add_code(res, ")?");
+        res.back().second++;
         
         res.splice(res.end(), translate(if_d.if_branch, holder));
         
@@ -84,7 +97,6 @@ source_code_t translate(if_def &if_d, var_holder &holder) {
         res.push_back({":", 1});
         
         res.splice(res.end(), translate(if_d.else_branch, holder));
-        
         res.back().second--;
     }
     return res;
@@ -106,20 +118,17 @@ source_code_t translate(scope &sc, f_type_sp ret_type) {
     res.push_back({"} ()", 0});
     return res;
 }
-source_code_t translate(real_term &t, f_type_sp val_t, var_holder &holder) {
+source_code_t translate(real_term &t, f_type_sp res_t, var_holder &holder) {
     if ((t.t_1 == nullptr) && (t.t_2 == nullptr)) {
-        if (val_t == f_type::create("string")) {
+        if (res_t == f_type::create("string")) {
             return {{"\"" + t.val + "\"", 0}};
         }
         return {{t.val, 0}};
     }
     if (t.t_1 == nullptr) {
-        source_code_t sub_res = translate(t.t_2, holder);
-        if (sub_res.size() == 1) {
-            return {{"(" + t.val + sub_res.front().first + ")", 0}};
-        }
-        source_code_t res({{t.val, 0}});
-        res.splice(res.end(), sub_res);
+        source_code_t res({{"(" + t.val, 0}});
+        add_code(res, translate(t.t_2, holder));
+        add_code(res, ")");
         return res;
     }
     assert(t.t_2 != nullptr);
@@ -128,21 +137,40 @@ source_code_t translate(real_term &t, f_type_sp val_t, var_holder &holder) {
     source_code_t res_1 = translate(t.t_1, holder);
     source_code_t res_2 = translate(t.t_2, holder);
     
-    if ((res_1.size() == 1) && (res_2.size() == 1)) {
-        return {{"(" + res_1.front().first + " " + t.val + " " + res_2.front().first + ")", 0}};
+    if (t.val == "APP") {
+        if (res_t->val == f_type::DEFAULT_VAL) {
+            res.push_back({"bind(", 1});
+            res.splice(res.end(), res_1);
+            res.push_back({",", 0});
+            res.splice(res.end(), res_2);
+            
+            int no = 1;
+            f_type_sp c = res_t;
+            while (c->val == f_type::DEFAULT_VAL) {
+                res.push_back({", placeholders::_" + to_string(no), 0});
+                
+                no++;
+                c = c->t_2;
+            }
+            res.back().second--;
+            res.push_back({")", 0});
+        } else {
+            res.push_back({"(", 0});
+            add_code(res, move(res_1));
+            add_code(res, ") (");
+            add_code(res, move(res_2));
+            add_code(res, ")");
+        }
+        return res;
     }
     
-    res.push_back({"(", 1});
+    res.push_back({"(", 0});
+    add_code(res, move(res_1));
     
-    res.splice(res.end(), res_1);
-    res.back().second--;
+    add_code(res, t.val);
     
-    res.push_back({t.val, 1});
-    
-    res.splice(res.end(), res_2);
-    res.back().second--;
-    
-    res.push_back({")", 0});
+    add_code(res, move(res_2));
+    add_code(res, ")");
     return res;
 }
 
