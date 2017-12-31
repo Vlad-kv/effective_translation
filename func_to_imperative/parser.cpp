@@ -6,9 +6,8 @@ int yyparse();
 
 std::vector<std::string> parser_errors;
 
-term_seq_sp parse(std::istream *input, std::ostream *output) {
+term_seq_sp parse(std::istream *input) {
     input_stream = input;
-    output_stream = output;
     
     if (yyparse()) {
         throw std::runtime_error("Parser failed.");

@@ -16,7 +16,6 @@ using namespace std;
 #include "functional_parser.tab.hpp"
 
 istream *input_stream = nullptr;
-ostream *output_stream = nullptr;
 
 void fatal_error(string mess) {
     cout << "Fatal error : " << mess << "\n";

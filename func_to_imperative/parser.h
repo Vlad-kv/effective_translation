@@ -10,8 +10,7 @@ extern std::vector<std::string> parser_errors;
 #include "functional_grammar.h"
 
 extern std::istream *input_stream;
-extern std::ostream *output_stream;
 
-term_seq_sp parse(std::istream* input, std::ostream *output);
+term_seq_sp parse(std::istream* input);
 
 #endif // PARSER_H

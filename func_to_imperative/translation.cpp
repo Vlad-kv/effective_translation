@@ -5,6 +5,7 @@
 
 #include "translation.h"
 #include "parser.h"
+#include "preparation.h"
 
 using namespace std;
 term_seq_sp global_result = nullptr;
@@ -69,8 +70,11 @@ source_code_t translate(scope &sc, f_type_sp ret_type) {
     res.push_back({"} ()", 0});
     return res;
 }
-source_code_t translate(real_term &t, var_holder &holder) {
+source_code_t translate(real_term &t, f_type_sp val_t, var_holder &holder) {
     if ((t.t_1 == nullptr) && (t.t_2 == nullptr)) {
+        if (val_t == f_type::create("string")) {
+            return {{"\"" + t.val + "\"", 0}};
+        }
         return {{t.val, 0}};
     }
     if (t.t_1 == nullptr) {
@@ -165,7 +169,7 @@ source_code_t translate(let_definition_sp let_def, var_holder &holder) {
 
 source_code_t translate(term_sp t, var_holder &holder) {
     if (holds_alternative<real_term>(t->data)) {
-        return translate(get<real_term>(t->data), holder);
+        return translate(get<real_term>(t->data), t->type, holder);
     }
     if (holds_alternative<if_def>(t->data)) {
         return translate(get<if_def>(t->data), holder);
@@ -183,19 +187,25 @@ source_code_t translate(term_seq_sp terms, bool to_return) {
     
     source_code_t res;
     for (int e = 0; e < terms->terms.size(); e++) {
-        if ((to_return) && (e == terms->terms.size() - 1)) {
-            res.push_back({"return", 1});
-        }
         variant<term_sp, let_definition_sp> &w = terms->terms[e];
+        source_code_t sub_res;
         if (holds_alternative<term_sp>(w)) {
-            res.splice(res.end(), translate(get<term_sp>(w), holder));
+            sub_res = translate(get<term_sp>(w), holder);
         } else {
-            res.splice(res.end(), translate(get<let_definition_sp>(w), holder));
+            sub_res = translate(get<let_definition_sp>(w), holder);
         }
-        res.back().first.append(";");
+        sub_res.back().first.append(";");
         
         if ((to_return) && (e == terms->terms.size() - 1)) {
-            res.back().second--;
+            if (sub_res.size() == 1) {
+                res.push_back({"return " + sub_res.back().first, 0});
+            } else {
+                res.push_back({"return", 1});
+                res.splice(res.end(), sub_res);
+                res.back().second--;
+            }
+        } else {
+            res.splice(res.end(), sub_res);
         }
     }
     return res;
@@ -213,6 +223,12 @@ source_code_t generate_working_cpp(term_seq_sp terms) {
     res.push_back({"return 0;", -1});
     res.push_back({"}", 0});
     return res;
+}
+
+string cpp_of_ocaml(std::istream* input) {
+    term_seq_sp res = parse(input);
+    rename_and_inference(res);
+    return to_string(generate_working_cpp(res));
 }
 
 string to_string(source_code_t source_code) {
