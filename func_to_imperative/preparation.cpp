@@ -6,6 +6,44 @@
 
 const std::string f_type::DEFAULT_VAL = "->";
 
+const map<string, lib_func_info> standart_functions = {
+    {"print_string", 
+        {   "print_string",
+            {   {"void print_string(const string& str) {", 1},
+                {"cout << str;", -1},
+                {"}", 0}
+            },
+            f_type::create("string -> unit")
+        }
+    },
+    {"print_int",
+        {   "print_int",
+            {   {"void print_int(int i) {", 1},
+                {"cout << i;", -1},
+                {"}", 0}
+            },
+            f_type::create("int -> unit")
+        }
+    },
+    {"read_int",
+        {   "read_int",
+            {   {"int read_int() {", 1},
+                {"int res;", 0},
+                {"cin >> res;", 0},
+                {"return res;", -1},
+                {"}", 0}
+            },
+            f_type::create("unit -> int")
+        }
+    },
+    {"string_of_int",
+        {   "to_string",
+            {},
+            f_type::create("int -> string")
+        }
+    }
+};
+
 namespace {
     struct operator_t {
         operator_t(string disp, string res_t, vector<string> op_t)
@@ -49,10 +87,6 @@ namespace {
     const map<string, operator_t> unary_operators = {
         {"not", {"!", "bool"}},
         {"-"  , {"-", "int"}}
-    };
-    const map<string, pair<string, f_type_sp>> standart_functions = {
-        {"print_string", {"print_string", f_type::create("string -> unit")}},
-        {"string_of_int", {"to_string", f_type::create("int -> string")}}
     };
     
     struct var_info {
@@ -221,8 +255,8 @@ namespace {
 
 void rename_and_inference(term_seq_sp seq) {
     visible_vars.clear();
-    for (const pair<string, pair<string, f_type_sp>> &w : standart_functions) {
-        visible_vars.insert({w.first, {w.second.second, 0}});
+    for (const pair<string, lib_func_info> &w : standart_functions) {
+        visible_vars.insert({w.first, {w.second.type, 0}});
     }
     update(seq);
 }

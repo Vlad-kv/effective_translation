@@ -14,6 +14,17 @@ end;;
 (* let rec f : int -> (int -> int) -> int = fun a b ->
     a + 3;; *)
 
+if (true) then
+	2
+else
+	3
+;;
+if (false) then
+	()
+else
+	()
+;;
+
 (* if (true = false) then
     let str_1 : string = "fatal" in
     let str_2 : string = "error" in

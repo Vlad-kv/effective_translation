@@ -11,19 +11,19 @@ using namespace std;
 term_seq_sp global_result = nullptr;
 
 namespace {
-    set<string> visiable_vars({"print_string", "string_of_int"});
+    set<string> visible_vars;
     
     struct var_holder {
         var_holder() {
         }
         void insert(string var) {
             vars.push_back(var);
-            visiable_vars.insert(var);
+            visible_vars.insert(var);
         }
         var_holder& operator = (const var_holder& h) = delete; 
         ~var_holder() {
             for (string &w : vars) {
-                visiable_vars.erase(w);
+                visible_vars.erase(w);
             }
         }
     private:
@@ -50,8 +50,44 @@ source_code_t translate(term_seq_sp terms, bool to_return);
 source_code_t translate(term_sp t, var_holder &holder);
 
 source_code_t translate(if_def &if_d, var_holder &holder) {
-    // TODO
-    throw runtime_error("Not implemented.");
+    source_code_t res;
+    if (if_d.if_branch->type == f_type::create("unit")) {
+        res.push_back({"if (", 1});
+        
+        res.splice(res.end(), translate(if_d.condition, holder));
+        
+        res.back().second--;
+        res.push_back({") {", 1});
+        
+        res.splice(res.end(), translate(if_d.if_branch, holder));
+        
+        res.back().first.push_back(';');
+        res.back().second--;
+        res.push_back({"} else {", 1});
+        
+        res.splice(res.end(), translate(if_d.else_branch, holder));
+        
+        res.back().first.push_back(';');
+        res.back().second--;
+        res.push_back({"}", 0});
+    } else {
+        res.push_back({"(", 1});
+        
+        res.splice(res.end(), translate(if_d.condition, holder));
+        
+        res.back().second--;
+        res.push_back({")?", 1});
+        
+        res.splice(res.end(), translate(if_d.if_branch, holder));
+        
+        res.back().second--;
+        res.push_back({":", 1});
+        
+        res.splice(res.end(), translate(if_d.else_branch, holder));
+        
+        res.back().second--;
+    }
+    return res;
 }
 
 source_code_t translate(var_name &var_n, var_holder &holder) {
@@ -136,7 +172,7 @@ source_code_t translate(let_definition_sp let_def, var_holder &holder) {
         string new_name;
         do {
             new_name = "new_arg_" + to_string(no);
-        } while (visiable_vars.count(new_name) > 0);
+        } while (visible_vars.count(new_name) > 0);
         
         new_arguments.push_back({new_name, f->t_1});
         
@@ -215,9 +251,16 @@ source_code_t generate_working_cpp(term_seq_sp terms) {
     source_code_t res({
         {"#include <iostream>", 0},
         {"#include <functional>", 0},
-        {"using namespace std;", 0},
-        {"int main() {", 1}
+        {"using namespace std;", 0}
     });
+    for (const pair<string, lib_func_info> &w : standart_functions) {
+        for (const pair<string, int> &e : w.second.cpp_code) {
+            res.push_back(e);
+        }
+        visible_vars.insert(w.first);
+    }
+    res.push_back({"int main() {", 1});
+    
     res.splice(res.end(), translate(terms, false));
     
     res.push_back({"return 0;", -1});
