@@ -50,6 +50,8 @@
 		<Unit filename="parser_error.cpp" />
 		<Unit filename="preparation.cpp" />
 		<Unit filename="preparation.h" />
+		<Unit filename="tests.cpp" />
+		<Unit filename="tests.h" />
 		<Unit filename="translation.cpp" />
 		<Unit filename="translation.h" />
 		<Extensions>
