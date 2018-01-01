@@ -39,10 +39,7 @@ void example() {
 }
 
 int main () {
-    
     test_all_correct();
-    
 //    example();
-    
     return 0;
 }

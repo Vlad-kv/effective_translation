@@ -63,7 +63,7 @@ void add_code(source_code_t &res, string str) {
     }
 }
 
-source_code_t translate(term_seq_sp terms, bool to_return);
+source_code_t translate(term_seq_sp terms, bool to_return, const string &new_args_to_call = "");
 source_code_t translate(term_sp t, var_holder &holder);
 
 source_code_t translate(if_def &if_d, var_holder &holder) {
@@ -200,6 +200,7 @@ source_code_t translate(let_definition_sp let_def, var_holder &holder) {
         string new_name;
         do {
             new_name = "new_arg_" + to_string(no);
+            no++;
         } while (visible_vars.count(new_name) > 0);
         
         new_arguments.push_back({new_name, f->t_1});
@@ -213,14 +214,21 @@ source_code_t translate(let_definition_sp let_def, var_holder &holder) {
     
     first_line += arguments + ") {";
     
-    if (new_arguments.size() > 0) {
-        // TODO
-        throw runtime_error("Not implemented.");
-    }
-    
     res.push_back({first_line, 1});
     
-    res.splice(res.end(), translate(let_def->terms, let_def->ret_type != f_type::create("unit")));
+    string new_args_to_call;
+    if (new_arguments.size() > 0) {
+        new_args_to_call = "(";
+        for (int w = 0; w < new_arguments.size(); w++) {
+            if (w != 0) {
+                new_args_to_call += ", ";
+            }
+            new_args_to_call += new_arguments[w].first;
+        }
+        new_args_to_call += ")";
+    }
+    
+    res.splice(res.end(), translate(let_def->terms, let_def->ret_type != f_type::create("unit"), new_args_to_call));
     
     res.back().second--;
     res.push_back({"})", 0});
@@ -246,7 +254,7 @@ source_code_t translate(term_sp t, var_holder &holder) {
     }
 }
 
-source_code_t translate(term_seq_sp terms, bool to_return) {
+source_code_t translate(term_seq_sp terms, bool to_return, const string &new_args_to_call) {
     var_holder holder;
     
     source_code_t res;
@@ -257,6 +265,11 @@ source_code_t translate(term_seq_sp terms, bool to_return) {
             sub_res = translate(get<term_sp>(w), holder);
         } else {
             sub_res = translate(get<let_definition_sp>(w), holder);
+        }
+        
+        if ((e == terms->terms.size() - 1) && (new_args_to_call != "")) {
+            sub_res.front().first = "(" + move(sub_res.front().first);
+            sub_res.back().first += ") " + new_args_to_call;
         }
         sub_res.back().first.append(";");
         
