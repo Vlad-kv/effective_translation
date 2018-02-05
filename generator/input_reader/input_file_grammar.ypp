@@ -1,15 +1,23 @@
 %{
+    #include <algorithm>
+    #include <vector>
     #include "../grammar_info.h"
     
     int yylex();
     void yyerror(char const *);
     
     extern grammar_info_builder input_grammar_result;
+    
+    typedef std::pair<std::vector<std::string>, std::string> single_tail_t;
+    typedef std::vector<single_tail_t> rules_tail_t;
 %}
 
 %union {
     std::string *string_ptr_val;
     char char_val;
+    std::vector<std::string> *str_vector_ptr_val;
+    single_tail_t *single_tail_ptr_val;
+    rules_tail_t *rules_tail_ptr_val;
 }
 
 %token <string_ptr_val> WORD
@@ -24,9 +32,17 @@
 %token SEPARATOR // %%
 
 %type <string_ptr_val> token_symbol
+%type <str_vector_ptr_val> symbols
+%type <single_tail_ptr_val> single_tail
+%type <rules_tail_ptr_val> rules_tail
 
 %%
-    input: CPP_CODE SEPARATOR tokens SEPARATOR operators SEPARATOR rules SEPARATOR;
+    input: CPP_CODE SEPARATOR tokens SEPARATOR operators SEPARATOR rules SEPARATOR {
+        std::string *code = $1;
+        
+        input_grammar_result.add_code(std::move(*code));
+        delete code;
+    };
     
     tokens: | token tokens;
     token:
@@ -42,22 +58,55 @@
     ;
     operators: | operator operators;
     operator:
-        LEFT token_symbol
-      | RIGHT token_symbol
+        LEFT token_symbol {
+            input_grammar_result.add_operator(*$2, grammar_info::associativity::left);
+            delete $2;
+        }
+      | RIGHT token_symbol {
+            input_grammar_result.add_operator(*$2, grammar_info::associativity::right);
+            delete $2;
+        }
     ;
     rules: | rule rules;
-    rule: WORD ':' rules_tail ';';
-    rules_tail: 
-        single_tail
-      | single_tail '|' rules_tail
+    rule: WORD ':' rules_tail ';' {
+        for (single_tail_t& w : *$3) {
+            input_grammar_result.add_rule(*$1, std::move(w.first), std::move(w.second), ""); // TODO
+        }
+        delete $1;
+        delete $3;
+    };
+    rules_tail:
+        single_tail {
+            $$ = new rules_tail_t({std::move(*$1)});
+            delete $1;
+        }
+      | single_tail '|' rules_tail {
+            $$ = $3;
+            $$->push_back(std::move(*$1));
+            delete $1;
+      }
     ;
     single_tail:
-        symbols
-      | symbols CPP_CODE
+        symbols {
+            std::reverse($1->begin(), $1->end());
+            $$ = new single_tail_t({std::move(*$1), ""});
+            delete $1;
+        }
+      | symbols CPP_CODE {
+            std::reverse($1->begin(), $1->end());
+            $$ = new single_tail_t({std::move(*$1), *$2});
+            delete $1;
+            delete $2;
+      }
     ;
     symbols:
         // empty
-      | token_symbol symbols
+        { $$ = new std::vector<std::string>(); }
+      | token_symbol symbols {
+            $$ = $2;
+            $$->push_back(std::move(*$1));
+            delete $1;
+      }
     ;
     token_symbol:
         WORD { $$ = $1; }

@@ -47,6 +47,7 @@
 		<Unit filename="input_reader/parser.h" />
 		<Unit filename="input_reader/parser_error.cpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="output.txt" />
 		<Unit filename="tests/input_grammar_test.cpp" />
 		<Unit filename="tests/tests.h" />
 		<Extensions>

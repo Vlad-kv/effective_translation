@@ -1,6 +1,10 @@
 #include <iostream>
 #include <set>
 #include <map>
+#include <vector>
+
+typedef std::pair<std::vector<std::string>, std::string> single_tail_t;
+typedef std::vector<single_tail_t> rules_tail_t;
 
 #include "input_file_grammar.tab.hpp"
 using namespace std;
