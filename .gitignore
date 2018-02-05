@@ -45,3 +45,5 @@ func_to_imperative/func_to_imperative.depend
 generator/input.txt
 generator/generator.depend
 generator/generator.layout
+generator/input_reader/input_file_grammar.tab.cpp
+generator/input_reader/input_file_grammar.tab.hpp

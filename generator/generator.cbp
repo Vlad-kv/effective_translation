@@ -3,6 +3,7 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="generator" />
+		<Option makefile="makefile" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -32,13 +33,22 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<ExtraCommands>
+			<Add before="mingw32-make" />
+		</ExtraCommands>
 		<Unit filename="grammar_info.cpp" />
 		<Unit filename="grammar_info.h" />
 		<Unit filename="input.txt" />
+		<Unit filename="input_reader/input_file_grammar.tab.cpp" />
+		<Unit filename="input_reader/input_file_grammar.tab.hpp" />
 		<Unit filename="input_reader/input_file_grammar.ypp" />
 		<Unit filename="input_reader/lexical_analyzer.cpp" />
+		<Unit filename="input_reader/parser.cpp" />
 		<Unit filename="input_reader/parser.h" />
+		<Unit filename="input_reader/parser_error.cpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="tests/input_grammar_test.cpp" />
+		<Unit filename="tests/tests.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

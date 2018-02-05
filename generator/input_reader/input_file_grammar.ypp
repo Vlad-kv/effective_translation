@@ -1,9 +1,12 @@
 %{
-    #include "grammar_info.h"
+    #include "../grammar_info.h"
+    
+    int yylex();
+    void yyerror(char const *);
 %}
 
 %union {
-    string *string_ptr_val;
+    std::string *string_ptr_val;
     char char_val;
 }
 
@@ -11,48 +14,32 @@
 %token <string_ptr_val> CPP_CODE
 
 %token <char_val> CHAR_TOKEN
-%token <string_ptr_val> TOKEN
 
 %token LEFT
 %token RIGHT
+%token LEX_ANALYSER_ERROR
 
 %token SEPARATOR // %%
 
 %%
-    input: CPP_CODE tokens operators rules
-    ;
-    tokens: SEPARATOR token_seq SEPARATOR
-    ;
-    token_seq:
-      // empty
-      | token token_seq
-    ;
+    input: CPP_CODE SEPARATOR tokens SEPARATOR operators SEPARATOR rules SEPARATOR;
+    
+    tokens: | token tokens;
     token:
-        '<' WORD '>' WORD {
+        '<' WORD '>' token_symbol {
             // TODO
         }
+      | token_symbol
     ;
-    operators: SEPARATOR operator_seq SEPARATOR;
-    operator_seq:
-      // empty
-      | operator operator_seq
-    ;
+    operators: | operator operators;
     operator:
-        LEFT WORD
-      | RIGHT WORD
+        LEFT token_symbol
+      | RIGHT token_symbol
     ;
-    rules: SEPARATOR rules_seq SEPARATOR;
-    rules_seq:
-        // empty
-      | rule rules_seq
-    ;
-    rule: WORD ':' rules_tail_seq;
-    rules_tail_seq:
-        // empty
-      | rules_tail rules_tail_seq
-    ;
+    rules: | rule rules;
+    rule: WORD ':' rules_tail ';';
     rules_tail: 
-        // empty
+        single_tail
       | single_tail '|' rules_tail
     ;
     single_tail:
@@ -61,7 +48,10 @@
     ;
     symbols:
         // empty
-      | TOKEN symbols
-      | CHAR_TOKEN symbols
+      | token_symbol symbols
+    ;
+    token_symbol:
+        WORD
+      | CHAR_TOKEN
     ;
 %%

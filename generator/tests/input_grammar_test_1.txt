@@ -1,0 +1,21 @@
+{
+    #include <iostream>
+}
+%%
+    <char> TEST_1
+    TEST_2
+%%
+	%l '*'
+	%r TEST_2
+%%
+    input:   
+      | TEST_1
+      | TEST_1 ',' TEST_2 {
+            cout << "!!!";
+      }
+    ;
+	input_2: '1' '2' '7' '\'' '\\'
+	;
+	empty:
+	;
+%%

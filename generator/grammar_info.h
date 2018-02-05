@@ -25,6 +25,7 @@ public:
     
     grammar_info(grammar_info&& info);
     grammar_info(const grammar_info& info);
+    grammar_info();
     
     std::map<std::string, token> tokens;
     std::map<std::string, operator_info> operators;

@@ -10,3 +10,6 @@ grammar_info::grammar_info(const grammar_info& info)
 : tokens(info.tokens), operators(info.operators),
   files_to_include(info.files_to_include), rules(info.rules)  {
 }
+
+grammar_info::grammar_info() {
+}
