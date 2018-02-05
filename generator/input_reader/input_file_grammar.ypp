@@ -3,6 +3,8 @@
     
     int yylex();
     void yyerror(char const *);
+    
+    extern grammar_info_builder input_grammar_result;
 %}
 
 %union {
@@ -21,15 +23,22 @@
 
 %token SEPARATOR // %%
 
+%type <string_ptr_val> token_symbol
+
 %%
     input: CPP_CODE SEPARATOR tokens SEPARATOR operators SEPARATOR rules SEPARATOR;
     
     tokens: | token tokens;
     token:
         '<' WORD '>' token_symbol {
-            // TODO
+            input_grammar_result.add_token(move(*$4), move(*$2));
+            delete $2;
+            delete $4;
         }
-      | token_symbol
+      | token_symbol {
+            input_grammar_result.add_token(move(*$1), "");
+            delete $1;
+        }
     ;
     operators: | operator operators;
     operator:
@@ -51,7 +60,7 @@
       | token_symbol symbols
     ;
     token_symbol:
-        WORD
-      | CHAR_TOKEN
+        WORD { $$ = $1; }
+      | CHAR_TOKEN { $$ = new std::string({'\'', $1}); }
     ;
 %%
