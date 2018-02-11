@@ -29,7 +29,12 @@
 %token RIGHT
 %token LEX_ANALYSER_ERROR
 
-%token SEPARATOR // %%
+%token SEPARATOR         // %%
+%token USER_DECLARATIONS // %%user_declarations
+%token UNION_VALUES      // %%union_values
+%token TOKENS            // %%tokens
+%token OPERATORS         // %%operators
+%token NOT_TERMINALS     // %%not_terminals
 
 %type <string_ptr_val> token_symbol
 %type <str_vector_ptr_val> symbols
@@ -37,11 +42,20 @@
 %type <rules_tail_ptr_val> rules_tail
 
 %%
-    input: CPP_CODE SEPARATOR tokens SEPARATOR operators SEPARATOR rules SEPARATOR {
-        std::string *code = $1;
+    input: USER_DECLARATIONS CPP_CODE
+           UNION_VALUES      CPP_CODE
+           TOKENS            tokens
+           OPERATORS         operators
+           NOT_TERMINALS     not_terminals
+           SEPARATOR         rules
+           SEPARATOR {
+        std::string *code = $2, *union_values = $4;
         
         input_grammar_result.add_code(std::move(*code));
         delete code;
+        
+        input_grammar_result.add_union_values(std::move(*union_values));
+        delete union_values;
     };
     
     tokens: | token tokens;
@@ -67,6 +81,12 @@
             delete $2;
         }
     ;
+    not_terminals: | not_terminal not_terminals
+    not_terminal: '<' WORD '>' WORD {
+        input_grammar_result.add_not_terminal(*$2, *$4);
+        delete $2;
+        delete $4;
+    }
     rules: | rule rules;
     rule: WORD ':' rules_tail ';' {
         for (single_tail_t& w : *$3) {

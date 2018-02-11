@@ -13,11 +13,13 @@ grammar_info::rule::rule(std::vector<std::string>&& body, std::string&& code, st
 
 grammar_info::grammar_info(grammar_info&& info)
 : tokens(move(info.tokens)), operators(move(info.operators)),
-  files_to_include(move(info.files_to_include)), rules(move(info.rules))  {
+  files_to_include(move(info.files_to_include)), union_values(move(info.union_values)),
+  rules(move(info.rules)), not_terminals_types(move(info.not_terminals_types))  {
 }
 grammar_info::grammar_info(const grammar_info& info)
 : tokens(info.tokens), operators(info.operators),
-  files_to_include(info.files_to_include), rules(info.rules)  {
+  files_to_include(info.files_to_include), union_values(info.union_values),
+  rules(info.rules), not_terminals_types(info.not_terminals_types)  {
 }
 grammar_info::grammar_info() {
 }
@@ -30,6 +32,7 @@ void grammar_info::clear() {
 }
 std::ostream& operator << (std::ostream& out, const grammar_info& info) {
     out << "files_to_include:\n  " << info.files_to_include << "\n";
+    out << "union_values:\n  " << info.union_values << "\n";
     out << "tokens:\n";
     for (const pair<string, grammar_info::token>& w : info.tokens) {
         out << "  " << w.first << " " << w.second.val << " " << w.second.type << "\n";
@@ -45,6 +48,10 @@ std::ostream& operator << (std::ostream& out, const grammar_info& info) {
             out << str << " ";
         }
         out << w.second.code << " " << w.second.res_type << "\n";
+    }
+    out << "not_terminals_types:\n";
+    for (const pair<string, string>& w : info.not_terminals_types) {
+        out << "  " << w.first << " " << w.second << "\n";
     }
     return out;
 }
@@ -65,10 +72,16 @@ void grammar_info_builder::add_token(const std::string& name, const std::string&
 void grammar_info_builder::add_code(std::string&& code) {
     res.files_to_include = move(code);
 }
+void grammar_info_builder::add_union_values(std::string&& code) {
+    res.union_values = move(code);
+}
 void grammar_info_builder::add_operator(const std::string& name, grammar_info::associativity a) {
     res.operators.insert({name, {res.operators.size(), a}});
 }
 void grammar_info_builder::add_rule(const std::string& name, std::vector<std::string>&& body,
               std::string&& code, std::string&& res_type) {
     res.rules.insert({name, {move(body), move(code), move(res_type)}});
+}
+void grammar_info_builder::add_not_terminal(const string& name, const string& type) {
+    res.not_terminals_types.emplace(name, type);
 }

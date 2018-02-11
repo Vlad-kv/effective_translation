@@ -39,8 +39,9 @@ public:
     
     std::map<std::string, token> tokens;
     std::map<std::string, operator_info> operators;
-    std::string files_to_include;
+    std::string files_to_include, union_values;
     std::multimap<std::string, rule> rules;
+    std::map<std::string, std::string> not_terminals_types;
 };
 
 class grammar_info_builder {
@@ -50,9 +51,11 @@ public:
     
     void add_token(const std::string& name, const std::string& type);
     void add_code(std::string&& code);
+    void add_union_values(std::string&& code);
     void add_operator(const std::string& name, grammar_info::associativity a);
     void add_rule(const std::string& name, std::vector<std::string>&& body,
                   std::string&& code, std::string&& res_type);
+    void add_not_terminal(const std::string& name, const std::string& type);
     
     int next_token_id = 256;
     grammar_info res;

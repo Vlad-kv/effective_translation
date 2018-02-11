@@ -21,7 +21,12 @@ const set<char> SPECIAL_SUMBOLS = {
 const map<string, int> KEY_WORDS = {
     {"%%", SEPARATOR},
     {"%l", LEFT},
-    {"%r", RIGHT}
+    {"%r", RIGHT},
+    {"%%user_declarations", USER_DECLARATIONS},
+    {"%%union_values", UNION_VALUES},
+    {"%%tokens", TOKENS},
+    {"%%operators", OPERATORS},
+    {"%%not_terminals", NOT_TERMINALS}
 };
 
 bool is_special_sumbol(char c) {

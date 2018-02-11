@@ -1,14 +1,19 @@
-{
+%%user_declarations {
     #include <iostream>
 }
-%%
+%%union_values {
+	std::string *string_ptr_val;
+}
+%%tokens
     <char> TEST_1
     TEST_2
-%%
+%%operators
 	%l '*'
-	%r TEST_2
+	%r TEST_3
+%%not_terminals
+	<string_ptr_val> input_2
 %%
-    input:   
+    input:
       | TEST_1
       | TEST_1 ',' TEST_2 {
             cout << "!!!";
