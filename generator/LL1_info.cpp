@@ -3,13 +3,13 @@
 #include <functional>
 using namespace std;
 
-bool is_not_terminal(const string& s) {
-	return ((s.size() > 0) && ('A' <= s[0]) && (s[0] <= 'Z'));
-}
+std::function<bool (const std::string& s)> LL1_info::default_not_terminal =
+    [] (const string& s) {
+        return ((s.size() > 0) && ('A' <= s[0]) && (s[0] <= 'Z'));
+    };
 
 LL1_info::rule::rule(const string& not_term, const vector<string>& res)
 : not_term(not_term), res(res) {
-	assert(is_not_terminal(not_term));
 	assert(res.size() > 0);
 	if (res.size() > 1) {
 		for (auto &s : res) {
@@ -18,10 +18,11 @@ LL1_info::rule::rule(const string& not_term, const vector<string>& res)
 	}
 }
 
-LL1_info::LL1_info(const string& start_not_term, const vector<rule>& graph, const string& last_sumbol)
-: g(graph), start_not_term(start_not_term), last_sumbol(last_sumbol) {
+LL1_info::LL1_info(const std::string& start_not_term, const std::vector<rule>& graph,
+                   const std::string& last_sumbol, std::function<bool (const std::string& s)> is_not_terminal)
+: g(graph), start_not_term(start_not_term), last_sumbol(last_sumbol), is_not_terminal(is_not_terminal) {
+    
 	assert(is_not_terminal(start_not_term));
-	
 	not_terminals.insert(start_not_term);
 	
 	for (rule &w : g) {
@@ -74,7 +75,7 @@ LL1_info::LL1_info(const string& start_not_term, const vector<rule>& graph, cons
 		}
 	}
 }
-void LL1_info::print_map(const set<string>& s, map<string, set<string>>& m) {
+void LL1_info::print_map(const std::set<std::string>& s, std::map<std::string, std::set<std::string>>& m) {
 	for (auto &w : s) {
 		cout << w << " : ";
 		for (const string& str : m[w]) {
@@ -107,19 +108,19 @@ void LL1_info::print_transitions() {
 }
 LL1_info::transition::transition() {
 }
-LL1_info::transition::transition(const vector<string>& new_expr, const set<string>& terminals_to_identify)
+LL1_info::transition::transition(const std::vector<std::string>& new_expr, const std::set<std::string>& terminals_to_identify)
 : new_expr(new_expr), terminals_to_identify(terminals_to_identify){
 }
 bool operator<(const LL1_info::transition& t_1, const LL1_info::transition& t_2) {
 	return (t_1.new_expr < t_2.new_expr);
 }
-void LL1_info::upd_set(set<string>& dest, const string& str) {
+void LL1_info::upd_set(std::set<std::string>& dest, const std::string& str) {
 	if (dest.count(str) == 0) {
 		dest.insert(str);
 		is_update_happened = true;
 	}
 }
-void LL1_info::upd_set(set<string>& dest, const set<string>& sourse) {
+void LL1_info::upd_set(std::set<std::string>& dest, const std::set<std::string>& sourse) {
 	for (auto &w : sourse) {
 		upd_set(dest, w);
 	}
@@ -135,7 +136,7 @@ struct on_return {
 	function<void ()> f;
 };
 
-set<string> LL1_info::calc_first(const vector<string>& v, size_t start_pos) {
+std::set<std::string> LL1_info::calc_first(const std::vector<std::string>& v, size_t start_pos) {
 	set<string> res;
 	
 	bool old_val = is_update_happened;

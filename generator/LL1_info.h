@@ -5,12 +5,13 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <functional>
 
 // Нетерминал начинается с большой латинской буквы, "эпсилон" - пустая строка.
 
-bool is_not_terminal(const std::string& s);
-
 struct LL1_info {
+    static std::function<bool (const std::string& s)> default_not_terminal;
+    
     struct rule {
         rule(const std::string& not_term, const std::vector<std::string>& res);
         
@@ -18,7 +19,8 @@ struct LL1_info {
         std::vector<std::string> res;
     };
     
-	LL1_info(const std::string& start_not_term, const std::vector<rule>& graph, const std::string& last_sumbol = "$");
+	LL1_info(const std::string& start_not_term, const std::vector<rule>& graph,
+             const std::string& last_sumbol = "$", std::function<bool (const std::string& s)> is_not_terminal = default_not_terminal);
 	
 	static void print_map(const std::set<std::string>& s, std::map<std::string, std::set<std::string>>& m);
 	void print_first();
@@ -37,6 +39,8 @@ struct LL1_info {
 		std::vector<std::string> new_expr;
 		mutable std::set<std::string> terminals_to_identify;
 	};
+	
+	std::function<bool (const std::string& s)> is_not_terminal;
 	
 	std::set<std::string> not_terminals;
 	std::map<std::string, std::set<transition>> rules;
