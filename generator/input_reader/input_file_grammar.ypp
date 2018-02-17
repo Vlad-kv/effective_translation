@@ -109,11 +109,17 @@
     single_tail:
         symbols {
             std::reverse($1->begin(), $1->end());
+            if ($1->empty()) {
+                $1->push_back("");
+            }
             $$ = new single_tail_t({std::move(*$1), ""});
             delete $1;
         }
       | symbols CPP_CODE {
             std::reverse($1->begin(), $1->end());
+            if ($1->empty()) {
+                $1->push_back("");
+            }
             $$ = new single_tail_t({std::move(*$1), *$2});
             delete $1;
             delete $2;

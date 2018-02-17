@@ -36,7 +36,7 @@ LL1_info::LL1_info(const std::string& start_not_term, const std::vector<rule>& g
 	}
 	for (auto &w : not_terminals) {
 		if (rules.count(w) == 0) {
-			throw runtime_error("not_terminal " + w + " has no rules");
+			throw runtime_error("not_terminal \"" + w + "\" has no rules");
 		}
 	}
 	is_update_happened = true;
@@ -75,36 +75,51 @@ LL1_info::LL1_info(const std::string& start_not_term, const std::vector<rule>& g
 		}
 	}
 }
-void LL1_info::print_map(const std::set<std::string>& s, std::map<std::string, std::set<std::string>>& m) {
+void LL1_info::print_map(const std::set<std::string>& s, std::map<std::string, std::set<std::string>>& m, std::ostream& out) {
 	for (auto &w : s) {
-		cout << w << " : ";
+		out << w << " : ";
 		for (const string& str : m[w]) {
-			cout << "\"" << str << "\"  ";
+			out << "\"" << str << "\"  ";
 		}
-		cout << "\n";
+		out << "\n";
 	}
 }
-void LL1_info::print_first() {
-	print_map(not_terminals, first);
+void LL1_info::print_first(std::ostream& out) {
+	print_map(not_terminals, first, out);
 }
-void LL1_info::print_follow() {
-	print_map(not_terminals, follow);
+void LL1_info::print_follow(std::ostream& out) {
+	print_map(not_terminals, follow, out);
 }
-void LL1_info::print_transitions() {
+void LL1_info::print_transitions(std::ostream& out) {
 	for (auto &w : rules) {
-		cout << w.first << ":\n";
+		out << w.first << ":\n";
 		for (const transition &trans : w.second) {
-			cout << "    ";
+			out << "    ";
 			for (const string& str : trans.new_expr) {
-				cout << "\"" << str << "\" ";
+				out << "\"" << str << "\" ";
 			}
-			cout << "  :  ";
+			out << "  :  ";
 			for (const string& str : trans.terminals_to_identify) {
-				cout << "\"" << str << "\" ";
+				out << "\"" << str << "\" ";
 			}
-			cout << "\n";
+			out << "\n";
 		}
 	}
+}
+std::pair<bool, std::string> LL1_info::is_ll1() {
+    for (const pair<string, set<transition>>& w : rules) {
+        set<string> existing_terminals;
+        for (const transition& trans : w.second) {
+            for (const string& term : trans.terminals_to_identify) {
+                if (existing_terminals.count(term) > 0) {
+                    return {false, "ambiguity on terminal \"" + term +
+                                "\" in not-terminal \"" + w.first + "\""};
+                }
+                existing_terminals.insert(term);
+            }
+        }
+    }
+    return {true, ""};
 }
 LL1_info::transition::transition() {
 }

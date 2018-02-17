@@ -5,6 +5,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "LL1_info.h"
 
 class grammar_info {
 public:
@@ -35,7 +38,12 @@ public:
     
     void clear();
     
+    void calculate_LL1_info();
+    
     friend std::ostream& operator << (std::ostream& out, const grammar_info& info);
+    
+    std::shared_ptr<LL1_info> ll1_info = nullptr;
+    std::string start_not_terminal = "";
     
     std::map<std::string, token> tokens;
     std::map<std::string, operator_info> operators;
@@ -46,6 +54,8 @@ public:
 
 class grammar_info_builder {
 public:
+    static const int DEFAULT_NEXT_TOKEN_ID = 256;
+    
     void clear();
     grammar_info extract();
     
@@ -57,7 +67,7 @@ public:
                   std::string&& code, std::string&& res_type);
     void add_not_terminal(const std::string& name, const std::string& type);
     
-    int next_token_id = 256;
+    int next_token_id = DEFAULT_NEXT_TOKEN_ID;
     grammar_info res;
 };
 

@@ -22,10 +22,12 @@ struct LL1_info {
 	LL1_info(const std::string& start_not_term, const std::vector<rule>& graph,
              const std::string& last_sumbol = "$", std::function<bool (const std::string& s)> is_not_terminal = default_not_terminal);
 	
-	static void print_map(const std::set<std::string>& s, std::map<std::string, std::set<std::string>>& m);
-	void print_first();
-	void print_follow();
-	void print_transitions();
+	static void print_map(const std::set<std::string>& s, std::map<std::string, std::set<std::string>>& m, std::ostream& out);
+	void print_first(std::ostream& out);
+	void print_follow(std::ostream& out);
+	void print_transitions(std::ostream& out);
+	
+	std::pair<bool, std::string> is_ll1();
 	
 	std::vector<rule> g;
 	std::string start_not_term, last_sumbol;

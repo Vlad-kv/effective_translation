@@ -1,0 +1,29 @@
+%%user_declarations {
+    #include <iostream>
+}
+%%union_values {
+}
+%%tokens
+    c
+%%operators
+	
+%%not_terminals
+	
+%%
+    R  : O R^;
+    R^ : '|' O R^;
+    R^ : ;
+    
+    O^ : C O^;
+    O^ : ;
+    O  : O^;
+    
+    M  : '*';
+    M  : '+';
+    M  : '?';
+    
+    C^ : M C^;
+    C^ : ;
+    C  : c C^;
+    C  : '(' R ')' C^;
+%%
