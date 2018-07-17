@@ -17,12 +17,6 @@ grammar_info::grammar_info(grammar_info&& info)
   files_to_include(move(info.files_to_include)), union_values(move(info.union_values)),
   rules(move(info.rules)), not_terminals_types(move(info.not_terminals_types))  {
 }
-grammar_info::grammar_info(const grammar_info& info)
-: ll1_info(info.ll1_info), start_not_terminal(info.start_not_terminal),
-  tokens(info.tokens), operators(info.operators),
-  files_to_include(info.files_to_include), union_values(info.union_values),
-  rules(info.rules), not_terminals_types(info.not_terminals_types) {
-}
 grammar_info::grammar_info() {
 }
 
@@ -104,6 +98,6 @@ void grammar_info_builder::add_rule(const std::string& name, std::vector<std::st
     }
     res.rules.insert({name, {move(body), move(code), move(res_type)}});
 }
-void grammar_info_builder::add_not_terminal(const string& name, const string& type) {
+void grammar_info_builder::add_not_terminal(const std::string& name, const std::string& type) {
     res.not_terminals_types.emplace(name, type);
 }

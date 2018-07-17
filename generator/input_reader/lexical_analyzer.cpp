@@ -26,7 +26,9 @@ const map<string, int> KEY_WORDS = {
     {"%%union_values", UNION_VALUES},
     {"%%tokens", TOKENS},
     {"%%operators", OPERATORS},
-    {"%%not_terminals", NOT_TERMINALS}
+    {"%%not_terminals", NOT_TERMINALS},
+    {"%%inh_attr_init", INH_ATTR_INIT},
+    {"%%inh_attributes", INH_ATTRIBUTES}
 };
 
 bool is_special_sumbol(char c) {

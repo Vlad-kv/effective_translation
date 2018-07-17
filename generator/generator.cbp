@@ -36,6 +36,8 @@
 		<ExtraCommands>
 			<Add before="mingw32-make" />
 		</ExtraCommands>
+		<Unit filename="LL1_info.cpp" />
+		<Unit filename="LL1_info.h" />
 		<Unit filename="grammar_info.cpp" />
 		<Unit filename="grammar_info.h" />
 		<Unit filename="input.txt" />
@@ -49,6 +51,8 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="output.txt" />
 		<Unit filename="tests/input_grammar_test.cpp" />
+		<Unit filename="tests/input_grammar_test_1.txt" />
+		<Unit filename="tests/input_grammar_test_2.txt" />
 		<Unit filename="tests/tests.h" />
 		<Extensions>
 			<code_completion />

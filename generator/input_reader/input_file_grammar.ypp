@@ -35,6 +35,8 @@
 %token TOKENS            // %%tokens
 %token OPERATORS         // %%operators
 %token NOT_TERMINALS     // %%not_terminals
+%token INH_ATTR_INIT     // %%inh_attr_init
+%token INH_ATTRIBUTES    // %%inh_attributes
 
 %type <string_ptr_val> token_symbol
 %type <str_vector_ptr_val> symbols
@@ -88,12 +90,13 @@
         delete $4;
     }
     rules: | rule rules;
-    rule: WORD ':' rules_tail ';' {
-        for (single_tail_t& w : *$3) {
+    rule: WORD ':' inh_arguments rules_tail ';' {
+        // TODO
+        for (single_tail_t& w : *$4) {
             input_grammar_result.add_rule(*$1, std::move(w.first), std::move(w.second), ""); // TODO
         }
         delete $1;
-        delete $3;
+        delete $4;
     };
     rules_tail:
         single_tail {
@@ -107,7 +110,7 @@
       }
     ;
     single_tail:
-        symbols {
+        symbols inh_initialaizers {
             std::reverse($1->begin(), $1->end());
             if ($1->empty()) {
                 $1->push_back("");
@@ -115,7 +118,7 @@
             $$ = new single_tail_t({std::move(*$1), ""});
             delete $1;
         }
-      | symbols CPP_CODE {
+      | symbols CPP_CODE inh_initialaizers {
             std::reverse($1->begin(), $1->end());
             if ($1->empty()) {
                 $1->push_back("");
@@ -137,5 +140,31 @@
     token_symbol:
         WORD { $$ = $1; }
       | CHAR_TOKEN { $$ = new std::string({'\'', $1}); }
+    ;
+    inh_arguments:
+        // empty
+        { // TODO
+        }
+      | INH_ATTRIBUTES attributes SEPARATOR {
+            // TODO
+        }
+    ;
+    attributes: | attribute attributes;
+    attribute:
+        '<' WORD '>' token_symbol {
+            // TODO
+        }
+    ;
+    inh_initialaizers:
+        // empty
+        { // TODO
+        }
+      | inh_initialaizer inh_initialaizers {
+            // TODO
+        }
+    ;
+    inh_initialaizer: INH_ATTR_INIT WORD CPP_CODE {
+            // TODO
+        }
     ;
 %%

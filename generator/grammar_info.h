@@ -33,7 +33,7 @@ public:
     };
 
     grammar_info(grammar_info&& info);
-    grammar_info(const grammar_info& info);
+    grammar_info(const grammar_info& info) = default;
     grammar_info();
     
     void clear();

@@ -1,0 +1,36 @@
+%%user_declarations {
+    #include <iostream>
+}
+%%union_values {
+	std::string *string_ptr_val;
+}
+%%tokens
+    <char> TEST_1
+    TEST_2
+%%operators
+	%l '*'
+	%r TEST_3
+%%not_terminals
+	<string_ptr_val> input_2
+%%
+    input:
+        %%inh_attributes
+          <int> k
+          <float> v
+        %%
+      | TEST_1
+      | TEST_1 ',' TEST_2 {
+            cout << "!!!";
+      }
+            %%inh_attr_init 3 {
+                init_sumbol.z = sumbol_1.c * sumbol_0.k;
+            }
+            %%inh_attr_init 1 {
+                init_sumbol.c = sumbol_0.k + 5;
+            }
+    ;
+	input_2: '1' '2' '7' '\'' '\\'
+	;
+	empty:
+	;
+%%
