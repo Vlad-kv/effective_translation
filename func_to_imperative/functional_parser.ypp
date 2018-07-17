@@ -214,6 +214,9 @@
         | term AND term { $$ = new term({term_sp($1), "&&", term_sp($3)}, f_type::create("bool")); }
         | term OR  term { $$ = new term({term_sp($1), "||", term_sp($3)}, f_type::create("bool")); }
         
+        | term '<' term { $$ = new term({term_sp($1), "<", term_sp($3)}, f_type::create("bool")); }
+        | term '>' term { $$ = new term({term_sp($1), ">", term_sp($3)}, f_type::create("bool")); }
+        
         | term '='            term { $$ = new term({term_sp($1), "==", term_sp($3)}, f_type::create("bool")); }
         | term NOT_EQUAL      term { $$ = new term({term_sp($1), "!=", term_sp($3)}, f_type::create("bool")); }
         | term LESS_OR_EQUAL  term { $$ = new term({term_sp($1), "<=", term_sp($3)}, f_type::create("bool")); }

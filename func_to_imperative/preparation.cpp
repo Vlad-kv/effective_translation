@@ -78,6 +78,9 @@ namespace {
         {"<=", {"<=", "bool", {"int", "string", "bool"}}},
         {">=", {">=", "bool", {"int", "string", "bool"}}},
         
+        {">" , {">" , "bool", {"int", "string", "bool"}}},
+        {"<" , {"<" , "bool", {"int", "string", "bool"}}},
+        
         {"&&", {"&&", "bool"}},
         {"||", {"||", "bool"}},
         {"^" , {"+" , "string"}}

@@ -18,28 +18,28 @@ void example() {
     
     try {
         res = parse(&input);
-        output << to_string(res) << "\n";
+//        output << to_string(res) << "\n";
     } catch (runtime_error error) {
         cout << error.what() << "\n";
         return;
     }
-    output << "\n\n\n##########\n##########\n\n";
+//    output << "\n\n\n##########\n##########\n\n";
     
     try {
         rename_and_inference(res);
-        output << to_string(res) << "\n";
+//        output << to_string(res) << "\n";
     } catch (runtime_error error) {
         cout << error.what() << "\n";
         return;
     }
     
-    output << "\n\n**********\n**********\n**********\n**********\n\n";
+//    output << "\n\n**********\n**********\n**********\n**********\n\n";
     
     output << to_string(generate_working_cpp(res));
 }
 
 int main () {
-    test_all_correct();
-//    example();
+//    test_all_correct();
+    example();
     return 0;
 }
